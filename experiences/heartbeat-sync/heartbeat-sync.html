@@ -81,6 +81,13 @@
 //  Standalone HTML5 Canvas + Web Audio API
 // ─────────────────────────────────────────────────────────────
 
+const isEmbedded = (window.parent && window.parent !== window);
+if (isEmbedded) {
+  document.body.classList.add('is-embedded');
+  const cb = document.getElementById('controlBar');
+  if (cb) cb.style.display = 'none';
+}
+
 const canvas = document.getElementById('main');
 const ctx    = canvas.getContext('2d');
 
@@ -89,8 +96,8 @@ const CFG = {
   name1:   'Umar',
   name2:   'Tanvi',
   msg:     'Two Hearts, One Beat',
-  sub:     'Forever Yours 💜',
-  color1:  { main:'#b0b8c4', glow:'rgba(185,195,210,0.85)', dark:'#717a8a' }, // Elegant Silver-Gray
+  sub:     'Forever Yours',
+  color1:  { main:'#ffffff', glow:'rgba(255,255,255,0.85)', dark:'#e0e0e0' }, // Luminous Diamond-White
   color2:  { main:'#4fa8ff', glow:'rgba(79,168,255,0.85)',  dark:'#1a70cc' }, // Sapphire Sky-Blue
   merged:  { main:'#c084fc', glow:'rgba(192,132,252,0.85)', dark:'#7c3aed' }, // Radiant Lavender
   speed:   1.0,
@@ -110,15 +117,37 @@ const COLOR_SCHEMES = {
 // ── Resize ──
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width  = window.innerWidth  * dpr;
-  canvas.height = window.innerHeight * dpr;
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(dpr, dpr);
   W = window.innerWidth;
   H = window.innerHeight;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
 }
 let W = window.innerWidth, H = window.innerHeight;
-window.addEventListener('resize', () => { resize(); resetScene(); });
+
+function onWindowResize() {
+  resize();
+  if (!state.isPlaying) {
+    state.lx = -W * 0.25; state.ly = H * 0.45;
+    state.rx =  W * 1.25; state.ry = H * 0.45;
+    state.cx =  W * 0.50; state.cy = H * 0.45;
+    initParticles();
+  } else {
+    state.cx = W * 0.50;
+    state.cy = H * 0.45;
+    if (state.phase >= PHASE.MERGE) {
+      const scale = getHeartScale() * 1.25;
+      const goldenOffsets = sampleHeartOffsets(scale, particles.length);
+      for (let i = 0; i < particles.length; i++) {
+        const off = goldenOffsets[i % goldenOffsets.length];
+        particles[i].mRelX = off.relX;
+        particles[i].mRelY = off.relY;
+      }
+    }
+  }
+}
+window.addEventListener('resize', onWindowResize);
 resize();
 
 // ─────────────────────────────────────────────────────────────
@@ -496,22 +525,24 @@ function getHeartScale() {
 const PHASE = {
   IDLE:         0,
   INTRO:        1, // stars fade in
-  FLY_IN:       2, // left heart enters fast, decelerates as it approaches center collision
-  COLLIDE:      3, // impact explosion & shockwaves
-  MERGE:        4, // reform into ONE BIG GOLDEN HEART
-  ECG:          5, // ECG drama line across bottom
-  MSG_REVEAL:   6, // "Two Hearts, One Beat" text
-  FINALE:       7, // Finale names, heart rain, click interactive
+  FLY_IN:       2, // hearts approach smoothly towards each other until touching
+  TOUCH_MERGE:  3, // hearts slowly merge into each other at center
+  COLLIDE:      4, // impact explosion & shockwaves (BURST)
+  MERGE:        5, // reform into ONE BIG GOLDEN LAVENDER HEART
+  ECG:          6, // ECG drama line across bottom
+  MSG_REVEAL:   7, // "Two Hearts, One Beat" text
+  FINALE:       8, // Finale names, gentle heart rain, click interactive
 };
 
 const PHASE_DUR = {
-  [PHASE.INTRO]:      3.0, // stars fade in gently
-  [PHASE.FLY_IN]:     9.0, // hearts approach very slowly over 9 seconds
-  [PHASE.COLLIDE]:    2.0, // impact explosion & shockwaves
-  [PHASE.MERGE]:      7.0, // golden heart 4-side slow inflow (4.2s flight)
-  [PHASE.ECG]:        4.5, // ECG line pulse
-  [PHASE.MSG_REVEAL]: 6.5, // message and names reveal
-  [PHASE.FINALE]:     9999,
+  [PHASE.INTRO]:        1.5, // stars fade in gently
+  [PHASE.FLY_IN]:       5.5, // smooth approach until hearts touch
+  [PHASE.TOUCH_MERGE]:  3.5, // slow graceful merge into each other
+  [PHASE.COLLIDE]:      1.8, // impact explosion & shockwaves (BURST)
+  [PHASE.MERGE]:        5.5, // golden lavender heart 4-side slow inflow
+  [PHASE.ECG]:          3.5, // ECG line pulse
+  [PHASE.MSG_REVEAL]:   4.5, // message and names reveal
+  [PHASE.FINALE]:       5.0, // peaceful finale hold before auto-transitioning
 };
 
 let state = {
@@ -560,6 +591,8 @@ let state = {
   recChunks: [],
 };
 
+let finaleTimer = null;
+
 // ─────────────────────────────────────────────────────────────
 //  PHASE TRANSITIONS
 // ─────────────────────────────────────────────────────────────
@@ -597,7 +630,14 @@ function enterPhase(ph) {
     startBGM();
   }
 
+  if (ph === PHASE.TOUCH_MERGE) {
+    state.lx = W * 0.44;
+    state.rx = W * 0.56;
+  }
+
   if (ph === PHASE.COLLIDE) {
+    state.lx = W * 0.50;
+    state.rx = W * 0.50;
     state.nameTextAlpha = 0;
     state.hasExploded = false;
     state.shockwaveR = 0; state.shockwaveAlpha = 0;
@@ -648,9 +688,13 @@ function enterPhase(ph) {
 
   if (ph === PHASE.FINALE) {
     state.finaleAlpha = 0;
-    try {
-      window.parent?.postMessage({ type: 'CASA_SCENE_FINISHED', scene: 'heartbeat-sync' }, '*');
-    } catch (e) {}
+    if (finaleTimer) clearTimeout(finaleTimer);
+    const holdTime = isEmbedded ? 5000 : 8000;
+    finaleTimer = setTimeout(() => {
+      try {
+        window.parent?.postMessage({ type: 'CASA_SCENE_FINISHED', scene: 'heartbeat-sync' }, '*');
+      } catch (e) {}
+    }, holdTime);
   }
 }
 
@@ -711,31 +755,20 @@ function draw(now) {
     }
   }
 
-  // ── Hearts FLY IN & Approach (Phase 2: Starts fast, decelerates as it approaches center collision) ──
+  // ── Hearts FLY IN & Approach (Phase 2: Starts offscreen, smoothly travels until touching) ──
   if (ph === PHASE.FLY_IN) {
-    // If master soundtrack audio is playing in parent, lock collision exactly to Hook 1 drop at 44.0s
-    if (window.parent && window.parent.masterAudio) {
-      try {
-        const curT = window.parent.masterAudio.currentTime;
-        if (curT >= 44.0) {
-          enterPhase(PHASE.COLLIDE);
-        }
-      } catch (_) {}
-    }
     const dur = PHASE_DUR[PHASE.FLY_IN];
     const flyProg = clamp(elapsed / dur, 0, 1);
-    // Ease-out curve: high velocity at start (fast entry), gradually decelerates as hearts get close to center impact point
     const easeProg = 1 - Math.pow(1 - flyProg, 2.5);
 
-    // Animate heart centers continuously from offscreen left/right to center collision point (0.50W)
-    state.lx = lerp(-W * 0.25, W * 0.50, easeProg);
-    state.rx = lerp( W * 1.25, W * 0.50, easeProg);
-    state.nameTextAlpha = clamp(flyProg / 0.25, 0, 1);
+    state.lx = lerp(-W * 0.25, W * 0.44, easeProg);
+    state.rx = lerp( W * 1.25, W * 0.56, easeProg);
+    state.nameTextAlpha = clamp(flyProg / 0.22, 0, 1);
 
-    // ── Spawn Blurry Trailing Heart Particles Behind Moving Hearts (Light & Smooth) ──
+    // Spawn blurry trailing heart particles behind moving hearts
     if (state.isPlaying) {
       const scale = getHeartScale();
-      // Left Heart Trail (moving right -> trail emits leftwards)
+      // Left Heart Trail
       if (Math.random() < 0.7) {
         const offX = (Math.random() - 0.5) * scale * 10;
         const offY = (Math.random() - 0.5) * scale * 10;
@@ -751,7 +784,7 @@ function draw(now) {
           maxLife: 20 + Math.floor(Math.random() * 12),
         });
       }
-      // Right Heart Trail (moving left -> trail emits rightwards)
+      // Right Heart Trail
       if (Math.random() < 0.7) {
         const offX = (Math.random() - 0.5) * scale * 10;
         const offY = (Math.random() - 0.5) * scale * 10;
@@ -770,21 +803,46 @@ function draw(now) {
     }
   }
 
-  // ── Collision Impact — DHAKKA / CRASH! (Phase 3) ──
+  // ── Hearts TOUCH & SLOW MERGE (Phase 3: Hearts meet, slowly interlace and merge into center) ──
+  if (ph === PHASE.TOUCH_MERGE) {
+    const dur = PHASE_DUR[PHASE.TOUCH_MERGE];
+    const mergeProg = clamp(elapsed / dur, 0, 1);
+    const easeMerge = mergeProg < 0.5
+      ? 2 * mergeProg * mergeProg
+      : 1 - Math.pow(-2 * mergeProg + 2, 2) / 2;
+
+    state.lx = lerp(W * 0.44, W * 0.50, easeMerge);
+    state.rx = lerp(W * 0.56, W * 0.50, easeMerge);
+    state.nameTextAlpha = clamp(1.0 - easeMerge * 0.6, 0.4, 1.0);
+
+    // Warm radiant fusion glow building as hearts merge together
+    const scale = getHeartScale();
+    const fusionGlow = ctx.createRadialGradient(W * 0.50, H * 0.45, 0, W * 0.50, H * 0.45, scale * 18);
+    fusionGlow.addColorStop(0, `rgba(225, 180, 255, ${0.18 + 0.38 * easeMerge})`);
+    fusionGlow.addColorStop(0.5, `rgba(180, 140, 255, ${0.08 + 0.22 * easeMerge})`);
+    fusionGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = fusionGlow;
+    ctx.beginPath();
+    ctx.arc(W * 0.50, H * 0.45, scale * 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ── Collision Impact (Phase 4: Impact explosion & 360° BURST after merge) ──
   if (ph === PHASE.COLLIDE) {
     state.lx = W * 0.50;
     state.rx = W * 0.50;
-    state.nameTextAlpha = Math.max(0, 1 - elapsed * 4);
+    state.nameTextAlpha = Math.max(0, 1 - elapsed * 5);
 
-    // MOMENT OF COLLISION IMPACT! 💥
     if (!state.hasExploded) {
       state.hasExploded = true;
       playMergeExplosion();
 
-      // MASSIVE explosion — particles fly high speed off screen!
+      // Particles blast radially outward in 360 degrees
       for (const p of particles) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.max(W, H) * (0.9 + Math.random() * 1.2);
+        const speed = Math.max(W, H) * (0.95 + Math.random() * 1.3);
         p.vx = Math.cos(angle) * speed;
         p.vy = Math.sin(angle) * speed;
         p.alpha = 1.0;
@@ -818,13 +876,14 @@ function draw(now) {
 
   // ── Heartbeat timing ──
   const beatInterval = state.beatInterval;
-  if (state.isPlaying && (ph === PHASE.FLY_IN || ph === PHASE.COLLIDE)) {
-    if (state.globalTime - state.lastLBeat >= beatInterval) {
+  if (state.isPlaying && (ph === PHASE.FLY_IN || ph === PHASE.TOUCH_MERGE || ph === PHASE.COLLIDE)) {
+    const interval = ph === PHASE.TOUCH_MERGE ? beatInterval * 0.92 : beatInterval;
+    if (state.globalTime - state.lastLBeat >= interval) {
       state.lastLBeat = state.globalTime;
       state.lBeat = state.globalTime;
       playHeartbeat('L', 0.85);
     }
-    if (state.globalTime - state.lastRBeat >= beatInterval * 1.05) {
+    if (state.globalTime - state.lastRBeat >= (ph === PHASE.TOUCH_MERGE ? interval : interval * 1.05)) {
       state.lastRBeat = state.globalTime;
       state.rBeat = state.globalTime;
       playHeartbeat('R', 0.85);
@@ -1234,14 +1293,17 @@ if (restartBtn) {
 //  INIT
 // ─────────────────────────────────────────────────────────────
 // Prime audio context on any user interaction
-window.addEventListener('pointerdown', () => initAudio(), { once: true });
-window.addEventListener('click', () => initAudio(), { once: true });
+window.addEventListener('message', e => {
+  if (!e.data) return;
+  if (e.data.type === 'CASA_START') {
+    if (!state.isPlaying) startAnimation();
+  }
+});
 
 resetScene();
 startAnimation();
 rafId = requestAnimationFrame(draw);
 
-// signal to Love-Animation standalone fallback if loaded together
 window.reactActive = true;
 </script>
 </body>

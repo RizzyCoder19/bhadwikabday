@@ -576,18 +576,6 @@
       if (soundtrack && soundtrack.audio && !soundtrack.audio.paused) {
         const t = soundtrack.getCurrentTime();
 
-        // Hook 1: Heartbeat Collision (Scene 2, index 1)
-        if (currentSceneIndex === 1 && !isTransitioning && !soundtrack.hook1Triggered) {
-          if (t >= 44.0) {
-            soundtrack.hook1Triggered = true;
-            try {
-              if (elFrame && elFrame.contentWindow) {
-                elFrame.contentWindow.postMessage({ type: 'CASA_TRIGGER_COLLIDE', time: t }, '*');
-              }
-            } catch (_) {}
-          }
-        }
-
         // Hook 2: Bow Arrow & Blossom (Scene 5)
         if (currentSceneIndex === 4 && !soundtrack.hook2Triggered) {
           if (t >= 124.0) {
@@ -696,12 +684,6 @@
         try {
           if (elFrame && elFrame.contentWindow) {
             elFrame.contentWindow.postMessage({ type: 'CASA_START' }, '*');
-            // If the audio has already reached or passed Hook 1 (44.0s) while loading,
-            // deliver the collision trigger safely after CASA_START!
-            if (index === 1 && soundtrack.getCurrentTime() >= 44.0 && !soundtrack.hook1Triggered) {
-              soundtrack.hook1Triggered = true;
-              elFrame.contentWindow.postMessage({ type: 'CASA_TRIGGER_COLLIDE', time: soundtrack.getCurrentTime() }, '*');
-            }
           }
         } catch (_) {}
         onFrameMounted(scene, token);
@@ -1032,6 +1014,14 @@
       if (isStarted && !isTransitioning) {
         elBtnContinue.click();
       }
+    }
+  });
+
+  // Listen for scene completion messages from embedded experiences to auto-advance
+  window.addEventListener('message', e => {
+    if (!e.data || typeof e.data !== 'object') return;
+    if (e.data.type === 'CASA_SCENE_FINISHED' && e.data.scene) {
+      handleExternalFinish(e.data.scene);
     }
   });
 
