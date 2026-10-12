@@ -105,23 +105,108 @@
       </button>
     </footer>
 
-    <!-- Final Personal Birthday Letter & Replay Screen -->
-    <section id="finaleLetter" class="finale-letter-screen" style="display:none;">
+    <!-- Final Personal Birthday Letter -->
+    <section id="finaleLetter" class="finale-letter-screen" style="display:none;" aria-label="Personal Birthday Letter">
       <div class="letter-card" id="letterCard" title="Tap to reveal full letter">
         <div class="letter-content" id="letterContent">
-          <p class="letter-greeting" id="letterGreeting">Happy birthday, baby. ❤️</p>
-          <p class="letter-para" id="letterPara1">I really wish I could be there with you today. I wanted to give you something that felt a little more personal than just a text, so I spent my time making this little corner of the internet for you.</p>
-          <p class="letter-para" id="letterPara2">I know it isn't the same as being there to hold you in person, but I hope it made you smile. Through every fight, every late-night conversation, and every mile between Mumbai and Howrah, I'm just really grateful for you.</p>
-          <p class="letter-para" id="letterPara3">Happy 14th, Tanvi. Meri bhadwi, meri cuttiya. I love you.</p>
-          <p class="letter-sign" id="letterSign">— Umar</p>
+          <p class="letter-greeting" id="letterGreeting">Happy 14th birthday, baby. ❤️</p>
+          <p class="letter-para" id="letterPara1">I know life gets overwhelming, and between Mumbai and Howrah, the distance sometimes feels so heavy. But through every quiet night, every late conversation, and every little moment, you are the easiest person to choose and my favorite reason to smile.</p>
+          <p class="letter-para" id="letterPara2">I didn't want to just send a simple text or buy something ordinary. I wanted to code an entire little universe just for you—somewhere you can always come back to and remember how deeply, endlessly loved and special you are.</p>
+          <p class="letter-para" id="letterPara3">Meri pyari bhadwi, meri cuttiya... thank you for being you. Happy 14th birthday, meri jaan. I love you more than words or code could ever show.</p>
+          <p class="letter-sign" id="letterSign">— Forever yours, Umar</p>
         </div>
 
         <div id="letterSkipHint" class="letter-skip-hint">tap anywhere to read all</div>
 
-        <div class="letter-actions" id="letterActions">
-          <button id="btnReplay" class="letter-replay-btn" type="button">
-            <span>Relive from beginning</span>
-            <span class="replay-icon">↺</span>
+        <div class="letter-actions" id="letterActions" style="opacity:0; pointer-events:none;">
+          <button id="btnEnterFinalStage" class="final-stage-btn" type="button" aria-label="Enter the final stage">
+            <span class="btn-glow-pulse"></span>
+            <span class="btn-label">Enter the final stage...</span>
+            <span class="btn-sparkle">✦</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         THE CINEMATIC EPILOGUE (The Secret Final Chapter)
+         ═════════════════════════════════════════════════════════════════ -->
+    <section id="cinematicEpilogue" class="cinematic-epilogue" style="display:none;" aria-hidden="true" role="region" aria-label="Cinematic Epilogue">
+      <!-- Deep Wine / Crimson Atmosphere & Stardust Backdrop -->
+      <div id="epilogueAtmosphere" class="epilogue-atmosphere">
+        <div class="epilogue-ambient-glow"></div>
+        <canvas id="epilogueStarCanvas" class="epilogue-star-canvas"></canvas>
+      </div>
+
+      <!-- PHASE 1: Mysterious Invitation View -->
+      <div id="epilogueInvitation" class="epilogue-invitation-view">
+        <div class="invitation-seal-wrapper">
+          <p class="invitation-eyebrow">A Secret Chapter</p>
+          <div class="invitation-ornament" aria-hidden="true">✦ &nbsp; ❧ &nbsp; ✦</div>
+          <button id="btnOpenEpilogue" class="mystery-seal-btn" type="button" aria-label="Open the secret chapter">
+            <span class="seal-halo"></span>
+            <span class="seal-inner">
+              <span class="seal-icon">💌</span>
+              <span class="seal-text">Open For You</span>
+            </span>
+            <span class="seal-sparkle" aria-hidden="true">✦</span>
+          </button>
+          <p class="invitation-hint">listen with sound on</p>
+          <button id="btnRetryAudio" class="epilogue-retry-btn" type="button" style="display:none;" aria-label="Retry playing audio">
+            <span>Tap to enable audio &amp; continue</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PHASE 2, 3, 4: Active Voice, Drifting Photographs & Grand Typography View -->
+      <div id="epilogueExperience" class="epilogue-experience-view" style="display:none;">
+        <!-- Background: Horizontal Drifting Photographic Lanes -->
+        <div id="photoLanesContainer" class="photo-lanes-container" aria-hidden="true">
+          <div class="photo-lane photo-lane--1" id="photoLane1"><div class="photo-lane-track" id="photoTrack1"></div></div>
+          <div class="photo-lane photo-lane--2" id="photoLane2"><div class="photo-lane-track" id="photoTrack2"></div></div>
+          <div class="photo-lane photo-lane--3" id="photoLane3"><div class="photo-lane-track" id="photoTrack3"></div></div>
+        </div>
+
+        <!-- Central Radial Vignette & Contrast Mask (Protects Typography Legibility) -->
+        <div class="epilogue-typography-vignette" aria-hidden="true"></div>
+
+        <!-- PHASE 3: Massive Editorial Typography -->
+        <div id="epilogueTypography" class="epilogue-typography-stage">
+          <h1 class="cinematic-title" id="cinematicTitle">
+            <span class="title-row title-row--1">
+              <span class="t-word" data-word="Once">Once</span>
+              <span class="t-word" data-word="again,">again,</span>
+            </span>
+            <span class="title-row title-row--2">
+              <span class="t-word t-word--italic" data-word="happy">happy</span>
+              <span class="t-word t-word--italic" data-word="birthday,">birthday,</span>
+            </span>
+            <span class="title-row title-row--3">
+              <span class="t-word t-word--accent" data-word="meri">meri</span>
+              <span class="t-word t-word--accent" data-word="jaan.">jaan.</span>
+              <span class="t-heart" aria-hidden="true">❤️</span>
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- PHASE 5: Canvas for Multi-Focal Layered Heart Burst -->
+      <canvas id="epilogueBurstCanvas" class="epilogue-burst-canvas"></canvas>
+
+      <!-- PHASE 6: Black Void & Final Replay Invitation View -->
+      <div id="epilogueRelive" class="epilogue-relive-view" style="display:none;">
+        <div class="relive-card">
+          <div class="relive-crest" aria-hidden="true">✦</div>
+          <blockquote class="relive-quote">
+            “Some moments deserve to be lived twice.”
+          </blockquote>
+          <p class="relive-subtext">Casa Tanvi &middot; A Cinematic Film for Tanvi</p>
+          <button id="btnReliveStory" class="relive-cinematic-btn" type="button" aria-label="Relive Our Story from the beginning">
+            <span class="btn-luminous-glow"></span>
+            <span class="btn-content">
+              <span class="btn-text">Relive Our Story</span>
+              <span class="btn-arrow" aria-hidden="true">↺</span>
+            </span>
           </button>
         </div>
       </div>
@@ -129,6 +214,7 @@
 
   </main>
 
+  <script src="./gsap.min.js"></script>
   <script src="./script.js"></script>
 </body>
 

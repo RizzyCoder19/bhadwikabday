@@ -689,7 +689,7 @@ function enterPhase(ph) {
   if (ph === PHASE.FINALE) {
     state.finaleAlpha = 0;
     if (finaleTimer) clearTimeout(finaleTimer);
-    const holdTime = isEmbedded ? 5000 : 8000;
+    const holdTime = isEmbedded ? 800 : 8000;
     finaleTimer = setTimeout(() => {
       try {
         window.parent?.postMessage({ type: 'CASA_SCENE_FINISHED', scene: 'heartbeat-sync' }, '*');

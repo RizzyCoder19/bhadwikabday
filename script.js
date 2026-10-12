@@ -48,7 +48,7 @@
       id: 'crimson-blossom',
       title: 'A Garden For You',
       number: '03',
-      url: './experiences/crimson-blossom/index.html',
+      url: './experiences/animated-flower/index.html',
       introNarrative: [
         { text: "I can't show up at your doorstep with a real bouquet today.", sub: "", duration: 4200 },
         { text: "So I coded you a garden that will never fade.", sub: "Just for you, Tanvi.", duration: 4800 }
@@ -62,7 +62,7 @@
       id: 'animated-flower',
       title: 'World Of Flowers',
       number: '04',
-      url: './experiences/animated-flower/index.html',
+      url: './experiences/crimson-blossom/index.html',
       introNarrative: [
         { text: "Every flower I couldn't give you in person…", sub: "I wanted to give you a whole endless universe of them.", duration: 4800 }
       ],
@@ -80,7 +80,7 @@
         { text: "For the girl who holds my heart in her hands…", sub: "Draw the bow & aim for my heart, baby.", duration: 4800 }
       ],
       outroNarrative: null,
-      autoContinueDelay: 28000,
+      autoContinueDelay: null, // Will NOT transition until user draws the bow and shoots the heart!
       targetAudioTime: 110.0, // Music leads directly into pre-chorus and 124s Hook 2 tree blossom
       duckAudio: false
     },
@@ -135,8 +135,28 @@
   const elBtnAudioToggle = document.getElementById('btnAudioToggle');
   const elIconVolumeOn = document.getElementById('iconVolumeOn');
   const elIconVolumeOff = document.getElementById('iconVolumeOff');
+  const elHud = document.getElementById('ambientHud');
+  const elFooter = document.getElementById('ambientFooter');
   const elFinaleLetter = document.getElementById('finaleLetter');
-  const elBtnReplay = document.getElementById('btnReplay');
+  const elLetterCard = document.getElementById('letterCard');
+  const elLetterActions = document.getElementById('letterActions');
+  const elBtnEnterFinalStage = document.getElementById('btnEnterFinalStage');
+  const elLetterSkipHint = document.getElementById('letterSkipHint');
+  const elCinematicEpilogue = document.getElementById('cinematicEpilogue');
+  const elEpilogueAtmosphere = document.getElementById('epilogueAtmosphere');
+  const elEpilogueStarCanvas = document.getElementById('epilogueStarCanvas');
+  const elEpilogueInvitation = document.getElementById('epilogueInvitation');
+  const elBtnOpenEpilogue = document.getElementById('btnOpenEpilogue');
+  const elBtnRetryAudio = document.getElementById('btnRetryAudio');
+  const elEpilogueExperience = document.getElementById('epilogueExperience');
+  const elPhotoLanesContainer = document.getElementById('photoLanesContainer');
+  const elPhotoTrack1 = document.getElementById('photoTrack1');
+  const elPhotoTrack2 = document.getElementById('photoTrack2');
+  const elPhotoTrack3 = document.getElementById('photoTrack3');
+  const elEpilogueTypography = document.getElementById('epilogueTypography');
+  const elEpilogueBurstCanvas = document.getElementById('epilogueBurstCanvas');
+  const elEpilogueRelive = document.getElementById('epilogueRelive');
+  const elBtnReliveStory = document.getElementById('btnReliveStory');
 
   let currentSceneIndex = -1;
   let isTransitioning = false;
@@ -179,10 +199,10 @@
             this.ctx = new AudioCtx();
           }
           if (this.ctx.state === 'suspended') {
-            this.ctx.resume().catch(() => {});
+            this.ctx.resume().catch(() => { });
           }
         }
-      } catch (_) {}
+      } catch (_) { }
       this.isUnlocked = true;
     }
 
@@ -190,7 +210,7 @@
       this.unlock();
       if (!this.audio) return;
       if (this.ctx && this.ctx.state === 'suspended') {
-        this.ctx.resume().catch(() => {});
+        this.ctx.resume().catch(() => { });
       }
       this.audio.muted = false;
       this.audio.volume = this.targetVolume;
@@ -212,7 +232,7 @@
       if (!this.audio || !force) return;
       try {
         this.audio.currentTime = Math.max(0, timeSeconds);
-      } catch (_) {}
+      } catch (_) { }
     }
 
     duck(factor = 0.4, duration = 0.5) {
@@ -584,7 +604,7 @@
               if (elFrame && elFrame.contentWindow) {
                 elFrame.contentWindow.postMessage({ type: 'CASA_TRIGGER_GIFT_FIRE', time: t }, '*');
               }
-            } catch (_) {}
+            } catch (_) { }
           }
         }
       }
@@ -685,7 +705,7 @@
           if (elFrame && elFrame.contentWindow) {
             elFrame.contentWindow.postMessage({ type: 'CASA_START' }, '*');
           }
-        } catch (_) {}
+        } catch (_) { }
         onFrameMounted(scene, token);
       }, 350);
     }
@@ -747,7 +767,7 @@
             // Auto advance to next chapter peacefully
             sceneAdvanceTimer = setTimeout(() => {
               advance();
-            }, 1200);
+            }, 500);
           }
         });
       }, 1000);
@@ -757,20 +777,21 @@
       } else {
         sceneAdvanceTimer = setTimeout(() => {
           advance();
-        }, 1200);
+        }, 500);
       }
     }
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  FINALE LETTER (Cinematic Gold Ink Penning Reveal)
+  //  PERSONAL BIRTHDAY LETTER (Word-by-Word Cinematic Reveal)
+  //  Appears after Scene 7 concludes, before the final climax stage.
   // ─────────────────────────────────────────────────────────────
   const LETTER_SECTIONS = [
-    { id: 'letterGreeting', text: 'Happy birthday, baby. ❤️', pauseAfter: 700 },
-    { id: 'letterPara1', text: 'I really wish I could be there with you yesterday. I wanted to give you something that felt a little more personal than just a text, so I spent my time making this little corner of the internet for you.', pauseAfter: 650 },
-    { id: 'letterPara2', text: "I know it isn't the same as being there to hold you in person, and the one i originally spent my entire time making.. but I hope it made you smile. Through every fight, every late-night conversation, and every mile between Mumbai and Howrah, I'm just really grateful for you.", pauseAfter: 650 },
-    { id: 'letterPara3', text: 'Happy 14th, Tanvi. Meri bhadwi, meri cuttiya. I love you.', pauseAfter: 800 },
-    { id: 'letterSign', text: '— Umar', pauseAfter: 500 }
+    { id: 'letterGreeting', text: 'Happy 14th birthday, baby. ❤️', pauseAfter: 750 },
+    { id: 'letterPara1', text: "I know life gets overwhelming, and between Mumbai and Howrah, the distance sometimes feels so heavy. But through every quiet night, every late conversation, and every little moment, you are the easiest person to choose and my favorite reason to smile.", pauseAfter: 700 },
+    { id: 'letterPara2', text: "I didn't want to just send a simple text or buy something ordinary. I wanted to code an entire little universe just for you—somewhere you can always come back to and remember how deeply, endlessly loved and special you are.", pauseAfter: 700 },
+    { id: 'letterPara3', text: 'Meri pyari bhadwi, meri cuttiya... thank you for being you. Happy 14th birthday, meri jaan. I love you more than words or code could ever show.', pauseAfter: 850 },
+    { id: 'letterSign', text: '— Forever yours, Umar', pauseAfter: 600 }
   ];
 
   let letterAbortController = null;
@@ -782,14 +803,16 @@
     if (letterAbortController) letterAbortController.aborted = true;
 
     document.querySelectorAll('.ink-word').forEach(w => w.classList.add('is-revealed'));
-    const cursor = document.querySelector('.ink-cursor');
-    if (cursor) cursor.remove();
-    const skipHint = document.getElementById('letterSkipHint');
-    if (skipHint) skipHint.classList.remove('is-visible');
-    const actions = document.getElementById('letterActions');
-    if (actions) {
-      actions.style.opacity = '1';
-      actions.style.pointerEvents = 'auto';
+    if (elLetterSkipHint) elLetterSkipHint.classList.remove('is-visible');
+    if (elLetterActions) {
+      elLetterActions.style.opacity = '1';
+      elLetterActions.style.pointerEvents = 'auto';
+      if (window.gsap) {
+        gsap.fromTo('#btnEnterFinalStage',
+          { opacity: 0, scale: 0.88, filter: 'blur(10px)' },
+          { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out' }
+        );
+      }
     }
   }
 
@@ -797,9 +820,6 @@
     letterFinished = false;
     const abort = { aborted: false };
     letterAbortController = abort;
-
-    const cursor = document.createElement('span');
-    cursor.className = 'ink-cursor';
 
     // Build the DOM structure with unrevealed ink words
     for (const section of LETTER_SECTIONS) {
@@ -818,25 +838,23 @@
       }
     }
 
-    const actions = document.getElementById('letterActions');
-    if (actions) {
-      actions.style.opacity = '0';
-      actions.style.pointerEvents = 'none';
+    if (elLetterActions) {
+      elLetterActions.style.opacity = '0';
+      elLetterActions.style.pointerEvents = 'none';
     }
 
-    const skipHint = document.getElementById('letterSkipHint');
-    if (skipHint) {
-      skipHint.classList.remove('is-visible');
+    if (elLetterSkipHint) {
+      elLetterSkipHint.classList.remove('is-visible');
       setTimeout(() => {
-        if (!letterFinished) skipHint.classList.add('is-visible');
+        if (!letterFinished && elLetterSkipHint) elLetterSkipHint.classList.add('is-visible');
       }, 2500);
     }
 
-    // Initial gentle hold before ink begins
-    await new Promise(r => setTimeout(r, 700));
+    // Initial gentle hold before words begin to fade in smoothly
+    await new Promise(r => setTimeout(r, 650));
     if (abort.aborted) return;
 
-    // Fluid, cinematic writing flow
+    // Fluid, cinematic word-by-word fade in
     for (const section of LETTER_SECTIONS) {
       if (abort.aborted) return;
       const el = document.getElementById(section.id);
@@ -848,12 +866,10 @@
         const w = words[i];
         w.classList.add('is-revealed');
 
-        w.insertAdjacentElement('afterend', cursor);
-
         const text = w.textContent;
-        let delay = 75;
-        if (text.includes(',') || text.includes(';')) delay = 240;
-        else if (text.includes('.') || text.includes('!') || text.includes('❤️') || text.includes('—')) delay = 520;
+        let delay = 110;
+        if (text.includes(',') || text.includes(';')) delay = 280;
+        else if (text.includes('.') || text.includes('!') || text.includes('❤️') || text.includes('—')) delay = 480;
 
         await new Promise(r => setTimeout(r, delay));
       }
@@ -863,38 +879,809 @@
 
     if (!abort.aborted) {
       letterFinished = true;
-      cursor.remove();
-      if (skipHint) skipHint.classList.remove('is-visible');
-      if (actions) {
-        actions.style.opacity = '1';
-        actions.style.pointerEvents = 'auto';
+      if (elLetterSkipHint) elLetterSkipHint.classList.remove('is-visible');
+      if (elLetterActions) {
+        elLetterActions.style.opacity = '1';
+        elLetterActions.style.pointerEvents = 'auto';
+        if (window.gsap) {
+          gsap.fromTo('#btnEnterFinalStage',
+            { opacity: 0, scale: 0.88, filter: 'blur(10px)' },
+            { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.8, ease: 'power3.out' }
+          );
+        }
       }
     }
   }
 
+  // ─────────────────────────────────────────────────────────────
+  //  THE CINEMATIC EPILOGUE (The Secret Final Chapter)
+  //  Order of experience:
+  //    1. Seven original scenes finish normally.
+  //    2. Curtain fades into deep black; HUD & footer hide.
+  //    3. Subtle wine-red atmosphere & stardust; understated invitation.
+  //    4. Viewer deliberate click: starts personal recording (Bhadwi.m4a)
+  //       Lut Gaye master soundtrack paused cleanly.
+  //    5. Massive cinematic typography: “Once again, happy birthday, meri jaan.”
+  //    6. Horizontal drifting photographic memory lanes (all 56 photos, uncropped).
+  //    7. Audio ended event: natural silence -> dissolve to black ->
+  //       multi-focal full-screen layered heart burst on canvas.
+  //    8. Settles into black void -> “Some moments deserve to be lived twice.”
+  //    9. “Relive Our Story” button cleanly restarts film from Scene 0.
+  // ─────────────────────────────────────────────────────────────
+
+  // All 56 unique photos of Tanvi & memories (preserved without cropping)
+  const ALL_PHOTOS = [
+    './photos/1000009221.jpg',
+    './photos/1000010561.jpg',
+    './photos/1000010562.jpg',
+    './photos/1000010563.jpg',
+    './photos/1000010564.jpg',
+    './photos/1000010565.jpg',
+    './photos/1000010566.jpg',
+    './photos/1000010567.jpg',
+    './photos/1000010568.jpg',
+    './photos/1000010569.jpg',
+    './photos/1000010570.jpg',
+    './photos/1000010571.jpg',
+    './photos/1000010572.jpg',
+    './photos/1000010573.jpg',
+    './photos/1000010574.jpg',
+    './photos/1000010575.jpg',
+    './photos/1000010576.jpg',
+    './photos/1000010577.jpg',
+    './photos/1000010578.jpg',
+    './photos/1000010579.jpg',
+    './photos/1000010580.jpg',
+    './photos/1000010581.jpg',
+    './photos/1000010582.jpg',
+    './photos/1000010583.jpg',
+    './photos/1000010584.jpg',
+    './photos/1000010585.jpg',
+    './photos/1000010586.jpg',
+    './photos/1000010587.jpg',
+    './photos/1000010588.jpg',
+    './photos/1000010589.jpg',
+    './photos/1000010590.jpg',
+    './photos/1000010591.jpg',
+    './photos/1000010592.jpg',
+    './photos/1000010593.jpg',
+    './photos/1000010594.jpg',
+    './photos/1000010595.jpg',
+    './photos/1000010596.jpg',
+    './photos/1000010597.jpg',
+    './photos/1000010598.jpg',
+    './photos/169941.jpg',
+    './photos/172059.jpg',
+    './photos/IMG_20260606_134202_631.jpg',
+    './photos/IMG_20260703_211727_458.jpg',
+    './photos/IMG_20260808_203740_846.jpg',
+    './photos/Screenshot_20260820_141358_Instagram.jpg',
+    './photos/Screenshot_20260826_011700_Instagram.jpg',
+    './photos/Screenshot_20260826_011714_Instagram.jpg',
+    './photos/Screenshot_20260826_142651_Instagram.jpg',
+    './photos/Screenshot_20260826_143136_Instagram.jpg',
+    './photos/Screenshot_20260828_154058_Instagram.jpg',
+    './photos/Screenshot_20260828_154303_Instagram.jpg',
+    './photos/Screenshot_20260828_154322_Instagram.jpg',
+    './photos/Screenshot_20260828_154337_Instagram.jpg',
+    './photos/Screenshot_20260828_154346_Instagram.jpg',
+    './photos/Screenshot_20260828_154428_Instagram.jpg',
+    './photos/Screenshot_20260828_160635_Instagram.jpg'
+  ];
+
+  let voiceAudio = null;
+  let voiceEndedHandled = false;
+  let epilogueAudioStarted = false;
+  let starAnimFrame = null;
+  let burstAnimFrame = null;
+  let starParticles = [];
+  let burstHearts = [];
+  let burstCtx = null;
+  let starCtx = null;
+  let epilogueActiveTimeline = null;
+  let lanesPopulated = false;
+
+  // Stardust animation loop for Phase 1 wine-red atmosphere
+  function initEpilogueStars() {
+    if (!elEpilogueStarCanvas) return;
+    const canvas = elEpilogueStarCanvas;
+    const w = (canvas.width = window.innerWidth);
+    const h = (canvas.height = window.innerHeight);
+    starCtx = canvas.getContext('2d');
+    starParticles = [];
+    for (let i = 0; i < 48; i++) {
+      starParticles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: Math.random() * 1.8 + 0.6,
+        alpha: Math.random() * 0.7 + 0.2,
+        speedY: -(Math.random() * 18 + 8),
+        twinkleSpeed: Math.random() * 2 + 1,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    if (starAnimFrame) cancelAnimationFrame(starAnimFrame);
+    function starLoop() {
+      if (!starCtx) return;
+      starCtx.clearRect(0, 0, canvas.width, canvas.height);
+      const now = performance.now() * 0.001;
+      for (const p of starParticles) {
+        p.y += p.speedY * 0.016;
+        if (p.y < -10) {
+          p.y = canvas.height + 10;
+          p.x = Math.random() * canvas.width;
+        }
+        const a = p.alpha * (0.6 + 0.4 * Math.sin(now * p.twinkleSpeed + p.phase));
+        starCtx.fillStyle = `rgba(255, 215, 0, ${Math.max(0, a * 0.6)})`;
+        starCtx.beginPath();
+        starCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        starCtx.fill();
+      }
+      starAnimFrame = requestAnimationFrame(starLoop);
+    }
+    starAnimFrame = requestAnimationFrame(starLoop);
+  }
+
+  // Populate photo lanes with all 56 photos
+  function populatePhotoLanes() {
+    if (lanesPopulated) return;
+    lanesPopulated = true;
+
+    if (!elPhotoTrack1 || !elPhotoTrack2 || !elPhotoTrack3) return;
+    elPhotoTrack1.innerHTML = '';
+    elPhotoTrack2.innerHTML = '';
+    elPhotoTrack3.innerHTML = '';
+
+    // Split 56 photos across 3 lanes: 19, 18, 19
+    const lane1Photos = ALL_PHOTOS.slice(0, 19);
+    const lane2Photos = ALL_PHOTOS.slice(19, 37);
+    const lane3Photos = ALL_PHOTOS.slice(37);
+
+    function createLaneCard(photoUrl) {
+      const card = document.createElement('div');
+      card.className = 'photo-memory-card';
+      const img = document.createElement('img');
+      img.className = 'photo-memory-img';
+      img.src = photoUrl;
+      img.alt = 'Tanvi';
+      img.loading = 'lazy';
+      card.appendChild(img);
+      return card;
+    }
+
+    // Populate each track twice for seamless infinite CSS looping
+    [...lane1Photos, ...lane1Photos].forEach(url => {
+      elPhotoTrack1.appendChild(createLaneCard(url));
+    });
+    [...lane2Photos, ...lane2Photos].forEach(url => {
+      elPhotoTrack2.appendChild(createLaneCard(url));
+    });
+    [...lane3Photos, ...lane3Photos].forEach(url => {
+      elPhotoTrack3.appendChild(createLaneCard(url));
+    });
+  }
+
+  // Multi-focal Heart Burst Palette & Helpers
+  const BURST_COLORS = [
+    '#e60039', // vibrant crimson
+    '#ff1744', // radiant rose-red
+    '#ff4d6d', // tender rose
+    '#ff758f', // warm petal pink
+    '#c9184a', // deep ruby
+    '#800f2f', // rich wine
+    '#590d22', // midnight bordeaux
+    '#ffd700', // champagne gold
+    '#ffea75', // radiant amber gold
+    '#fff5eb'  // warm ivory
+  ];
+
+  function pickBurstColor() {
+    return BURST_COLORS[(Math.random() * BURST_COLORS.length) | 0];
+  }
+
+  function resizeBurstCanvas() {
+    if (!elEpilogueBurstCanvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    elEpilogueBurstCanvas.width = w * dpr;
+    elEpilogueBurstCanvas.height = h * dpr;
+    burstCtx = elEpilogueBurstCanvas.getContext('2d');
+    burstCtx.setTransform(1, 0, 0, 1, 0, 0);
+    burstCtx.scale(dpr, dpr);
+  }
+
+  function drawVectorHeart(ctx, x, y, size, color, alpha, rotation = 0) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const topCurve = size * 0.3;
+    ctx.moveTo(0, topCurve);
+    ctx.bezierCurveTo(-size * 0.5, -topCurve, -size, size * 0.35, 0, size);
+    ctx.bezierCurveTo(size, size * 0.35, size * 0.5, -topCurve, 0, topCurve);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Multi-focal layered heart burst (Center, Upper Left, Lower Right)
+  function triggerMultiFocalHeartBurst() {
+    resizeBurstCanvas();
+    burstHearts = [];
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    const focalPoints = [
+      { cx: w * 0.5,  cy: h * 0.48, count: 500, speedMin: 140, speedMax: 880 }, // Main focal center
+      { cx: w * 0.26, cy: h * 0.35, count: 280, speedMin: 120, speedMax: 720 }, // Upper left heart bloom
+      { cx: w * 0.74, cy: h * 0.62, count: 280, speedMin: 120, speedMax: 720 }  // Lower right heart bloom
+    ];
+
+    focalPoints.forEach(fp => {
+      for (let i = 0; i < fp.count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * (fp.speedMax - fp.speedMin) + fp.speedMin;
+        burstHearts.push({
+          x: fp.cx,
+          y: fp.cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - Math.random() * 95,
+          size: Math.random() * 13 + 5,
+          color: pickBurstColor(),
+          alpha: 1.0,
+          rot: Math.random() * Math.PI * 2,
+          vrot: (Math.random() - 0.5) * 8.5,
+          sway: Math.random() * 3.2 + 1.2,
+          phase: Math.random() * Math.PI * 2,
+          life: 0,
+          maxLife: Math.random() * 3.6 + 2.4
+        });
+      }
+    });
+
+    if (burstAnimFrame) cancelAnimationFrame(burstAnimFrame);
+
+    let lastTime = performance.now();
+    function burstLoop(now) {
+      const dt = Math.min((now - lastTime) * 0.001, 0.033);
+      lastTime = now;
+
+      if (!burstCtx) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      burstCtx.clearRect(0, 0, w, h);
+
+      for (let i = burstHearts.length - 1; i >= 0; i--) {
+        const p = burstHearts[i];
+        p.life += dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vx *= 0.965; // air friction
+        p.vy += 105 * dt; // gravity
+        p.rot += p.vrot * dt;
+        p.x += Math.sin(p.life * p.sway + p.phase) * 0.9;
+        p.alpha = Math.max(0, 1 - (p.life / p.maxLife));
+
+        if (p.life >= p.maxLife || p.alpha <= 0.01) {
+          burstHearts.splice(i, 1);
+          continue;
+        }
+
+        drawVectorHeart(burstCtx, p.x, p.y, p.size, p.color, p.alpha, p.rot);
+      }
+
+      if (burstHearts.length > 0) {
+        burstAnimFrame = requestAnimationFrame(burstLoop);
+      } else {
+        burstCtx.clearRect(0, 0, w, h);
+        burstAnimFrame = null;
+      }
+    }
+    burstAnimFrame = requestAnimationFrame(burstLoop);
+  }
+
+  function playEpilogueChimeSound() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      const now = ctx.currentTime;
+
+      // Deep resonant heart boom
+      const boom = ctx.createOscillator();
+      const bGain = ctx.createGain();
+      boom.type = 'sine';
+      boom.frequency.setValueAtTime(150, now);
+      boom.frequency.exponentialRampToValueAtTime(32, now + 0.7);
+      bGain.gain.setValueAtTime(0.4, now);
+      bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+      boom.connect(bGain);
+      bGain.connect(ctx.destination);
+      boom.start(now);
+      boom.stop(now + 0.78);
+
+      // Crystalline romantic harmony chimes
+      [587.33, 783.99, 1046.50, 1318.51, 1567.98].forEach((freq, idx) => {
+        const chime = ctx.createOscillator();
+        const cGain = ctx.createGain();
+        chime.type = 'triangle';
+        chime.frequency.setValueAtTime(freq, now + idx * 0.03);
+        cGain.gain.setValueAtTime(0.001, now + idx * 0.03);
+        cGain.gain.linearRampToValueAtTime(0.07, now + idx * 0.03 + 0.02);
+        cGain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.03 + 1.1);
+        chime.connect(cGain);
+        cGain.connect(ctx.destination);
+        chime.start(now + idx * 0.03);
+        chime.stop(now + idx * 0.03 + 1.15);
+      });
+    } catch (_) { }
+  }
+
+  // ── PHASE 1: Start Mysterious Epilogue Transition ──
+  function startCinematicEpilogue(skipInvitation = false) {
+    clearNarrative();
+    clearAllSceneTimers();
+    if (elFrame) elFrame.src = 'about:blank';
+
+    // Hide normal HUD & footer controls
+    if (elHud) elHud.style.display = 'none';
+    if (elFooter) elFooter.style.display = 'none';
+
+    // Reset epilogue flags
+    voiceEndedHandled = false;
+    epilogueAudioStarted = false;
+
+    // Show epilogue container & invitation view
+    if (elCinematicEpilogue) {
+      elCinematicEpilogue.style.display = 'flex';
+      elCinematicEpilogue.classList.add('is-active');
+    }
+    if (skipInvitation) {
+      if (elEpilogueInvitation) {
+        elEpilogueInvitation.style.display = 'none';
+        elEpilogueInvitation.style.opacity = '0';
+      }
+    } else {
+      if (elEpilogueInvitation) {
+        elEpilogueInvitation.style.display = 'flex';
+        elEpilogueInvitation.style.opacity = '1';
+      }
+      if (elBtnOpenEpilogue) {
+        elBtnOpenEpilogue.disabled = false;
+      }
+    }
+    if (elBtnRetryAudio) {
+      elBtnRetryAudio.style.display = 'none';
+    }
+    if (elEpilogueExperience) {
+      elEpilogueExperience.style.display = 'none';
+    }
+    if (elEpilogueRelive) {
+      elEpilogueRelive.style.display = 'none';
+    }
+
+    initEpilogueStars();
+
+    // Release curtain slowly into the wine-red atmosphere
+    setTimeout(() => {
+      elCurtain.classList.remove('curtain--active');
+    }, 600);
+
+    // GSAP choreographed reveal of the secret invitation (if not skipping directly to experience)
+    if (!skipInvitation && window.gsap) {
+      gsap.fromTo('.invitation-eyebrow',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 1.6, ease: 'power2.out', delay: 0.8 }
+      );
+      gsap.fromTo('.invitation-ornament',
+        { opacity: 0, scale: 0.85 },
+        { opacity: 1, scale: 1, duration: 1.4, ease: 'power2.out', delay: 1.1 }
+      );
+      gsap.fromTo('#btnOpenEpilogue',
+        { opacity: 0, scale: 0.88, filter: 'blur(8px)' },
+        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.8, ease: 'power3.out', delay: 1.4 }
+      );
+      gsap.fromTo('.invitation-hint',
+        { opacity: 0 },
+        { opacity: 0.7, duration: 1.6, ease: 'sine.out', delay: 2.2 }
+      );
+    }
+  }
+
+  // ── PHASE 2, 3, 4: Viewer Click Starts Recording & Experience ──
+  function beginEpilogueRecording() {
+    if (epilogueAudioStarted) return;
+    epilogueAudioStarted = true;
+
+    if (elBtnOpenEpilogue) {
+      elBtnOpenEpilogue.disabled = true;
+    }
+
+    // 1. Duck and cleanly pause master soundtrack
+    soundtrack.duck(0, 1.2);
+    setTimeout(() => {
+      soundtrack.pause();
+    }, 1250);
+
+    // 2. Prepare personal voice recording (Bhadwi.m4a)
+    if (voiceAudio) {
+      voiceAudio.pause();
+      voiceAudio = null;
+    }
+    voiceAudio = new Audio('./Bhadwi.m4a');
+    voiceAudio.preload = 'auto';
+
+    voiceAudio.addEventListener('ended', onVoiceRecordingFinished);
+    voiceAudio.addEventListener('error', onVoiceRecordingError);
+
+    // 3. Play voice recording
+    const playPromise = voiceAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.warn('Voice recording rejected by browser audio policy:', err);
+        if (elBtnRetryAudio) {
+          elBtnRetryAudio.style.display = 'inline-block';
+          elBtnRetryAudio.onclick = () => {
+            elBtnRetryAudio.style.display = 'none';
+            if (voiceAudio) voiceAudio.play().catch(() => { });
+          };
+        }
+      });
+    }
+
+    // 4. Populate photo lanes
+    populatePhotoLanes();
+
+    // 5. Fade out invitation view
+    if (window.gsap) {
+      gsap.to(elEpilogueInvitation, {
+        opacity: 0,
+        y: -18,
+        duration: 1.0,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          if (elEpilogueInvitation) elEpilogueInvitation.style.display = 'none';
+        }
+      });
+    } else {
+      if (elEpilogueInvitation) elEpilogueInvitation.style.display = 'none';
+    }
+
+    // 6. Reveal photo lanes & massive typography
+    if (elEpilogueExperience) {
+      elEpilogueExperience.style.display = 'flex';
+      elEpilogueExperience.style.opacity = '1';
+    }
+
+    // GSAP entrance for photo lanes
+    if (window.gsap) {
+      gsap.fromTo('#photoLanesContainer',
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 2.2, ease: 'power2.out', delay: 0.4 }
+      );
+
+      // PHASE 3: Massive editorial typography entrance (Smooth camouflage blend & fade-in)
+      const titleTl = gsap.timeline({ delay: 0.6 });
+      titleTl.fromTo('.t-word',
+        { opacity: 0, y: 24, filter: 'blur(22px)', scale: 0.96 },
+        { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1, duration: 2.2, stagger: 0.26, ease: 'power2.out' }
+      );
+      titleTl.fromTo('.t-heart',
+        { opacity: 0, scale: 0.4, filter: 'blur(12px)' },
+        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.4, ease: 'power2.out' },
+        '-=0.6'
+      );
+      // Gentle ambient floating breath
+      titleTl.to('#epilogueTypography', {
+        y: -6,
+        duration: 5.4,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+      epilogueActiveTimeline = titleTl;
+    } else {
+      document.querySelectorAll('.t-word, .t-heart').forEach(el => el.style.opacity = '1');
+    }
+  }
+
+  function onVoiceRecordingError(e) {
+    console.error('Epilogue voice audio loading error:', e);
+    if (elBtnRetryAudio) {
+      elBtnRetryAudio.style.display = 'inline-block';
+      elBtnRetryAudio.onclick = () => {
+        elBtnRetryAudio.style.display = 'none';
+        if (voiceAudio) voiceAudio.load();
+        if (voiceAudio) voiceAudio.play().catch(() => { });
+      };
+    }
+  }
+
+  // ── PHASE 5: Recording Ends -> Darkness -> Multi-Focal Heart Burst ──
+  function onVoiceRecordingFinished() {
+    if (voiceEndedHandled) return;
+    voiceEndedHandled = true;
+
+    // 1. Spoken words finish naturally. Wait brief moment (~600ms).
+    setTimeout(() => {
+      // 2. Dissolve photos, vignette & typography into deep black
+      if (window.gsap) {
+        gsap.to(['#photoLanesContainer', '#epilogueTypography', '.epilogue-typography-vignette'], {
+          opacity: 0,
+          filter: 'blur(14px)',
+          duration: 2.2,
+          ease: 'power2.inOut'
+        });
+      } else {
+        if (elEpilogueExperience) elEpilogueExperience.style.opacity = '0';
+      }
+
+      // 3. Intentional moment of silence (1100ms), then trigger multi-focal heart burst!
+      setTimeout(() => {
+        playEpilogueChimeSound();
+        triggerMultiFocalHeartBurst();
+
+        // 4. After burst reaches its peak, screen settles into dark void -> PHASE 6 Reveal
+        setTimeout(() => {
+          revealReliveScreen();
+        }, 3400);
+      }, 1100);
+    }, 600);
+  }
+
+  // ── PHASE 6: The Final Invitation to Relive Everything ──
+  function revealReliveScreen() {
+    if (elEpilogueExperience) {
+      elEpilogueExperience.style.display = 'none';
+    }
+    if (elEpilogueRelive) {
+      elEpilogueRelive.style.display = 'flex';
+      elEpilogueRelive.style.opacity = '0';
+    }
+
+    if (window.gsap) {
+      const reliveTl = gsap.timeline();
+      reliveTl.to(elEpilogueRelive, { opacity: 1, duration: 1.8, ease: 'power2.inOut' });
+      reliveTl.fromTo('.relive-crest',
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 1.4, ease: 'back.out(1.7)' },
+        '-=1.0'
+      );
+      reliveTl.fromTo('.relive-quote',
+        { opacity: 0, y: 22 },
+        { opacity: 1, y: 0, duration: 2.0, ease: 'power2.out' },
+        '-=0.8'
+      );
+      reliveTl.fromTo('.relive-subtext',
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 1.6, ease: 'power2.out' },
+        '-=1.2'
+      );
+      reliveTl.fromTo('.relive-cinematic-btn',
+        { opacity: 0, scale: 0.92, filter: 'blur(6px)' },
+        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 2.0, ease: 'power3.out' },
+        '-=0.8'
+      );
+      epilogueActiveTimeline = reliveTl;
+    } else {
+      if (elEpilogueRelive) elEpilogueRelive.style.opacity = '1';
+    }
+  }
+
+  // Clean Replay Mechanism: Resets all state and restarts 7-scene film
+  function reliveStoryFromBeginning() {
+    // 1. Stop & clean up epilogue audio
+    if (voiceAudio) {
+      voiceAudio.pause();
+      voiceAudio.currentTime = 0;
+      voiceAudio = null;
+    }
+
+    // 2. Cancel animations & clear canvases
+    if (starAnimFrame) {
+      cancelAnimationFrame(starAnimFrame);
+      starAnimFrame = null;
+    }
+    if (burstAnimFrame) {
+      cancelAnimationFrame(burstAnimFrame);
+      burstAnimFrame = null;
+    }
+    if (burstCtx && elEpilogueBurstCanvas) {
+      burstCtx.clearRect(0, 0, elEpilogueBurstCanvas.width, elEpilogueBurstCanvas.height);
+    }
+    if (starCtx && elEpilogueStarCanvas) {
+      starCtx.clearRect(0, 0, elEpilogueStarCanvas.width, elEpilogueStarCanvas.height);
+    }
+    burstHearts = [];
+    starParticles = [];
+
+    if (epilogueActiveTimeline) {
+      epilogueActiveTimeline.kill();
+      epilogueActiveTimeline = null;
+    }
+    if (window.gsap) {
+      gsap.killTweensOf([
+        '#cinematicEpilogue',
+        '#epilogueInvitation',
+        '#epilogueExperience',
+        '#photoLanesContainer',
+        '#epilogueTypography',
+        '.epilogue-typography-vignette',
+        '.t-word',
+        '.t-heart',
+        '#epilogueRelive',
+        '.relive-crest',
+        '.relive-quote',
+        '.relive-subtext',
+        '.relive-cinematic-btn'
+      ]);
+      gsap.set(['#photoLanesContainer', '#epilogueTypography', '.epilogue-typography-vignette'], {
+        opacity: 1,
+        filter: 'blur(0px)'
+      });
+      gsap.set('.t-word', { opacity: 0, y: 24, filter: 'blur(22px)' });
+      gsap.set('.t-heart', { opacity: 0, scale: 0.4, filter: 'blur(12px)' });
+    }
+
+    // 3. Reset letter state & hide containers
+    if (letterAbortController) {
+      letterAbortController.aborted = true;
+      letterAbortController = null;
+    }
+    letterFinished = false;
+    if (elFinaleLetter) {
+      elFinaleLetter.classList.remove('is-active');
+      elFinaleLetter.style.display = 'none';
+      elFinaleLetter.style.opacity = '';
+      elFinaleLetter.style.filter = '';
+      elFinaleLetter.style.transform = '';
+    }
+    if (elLetterActions) {
+      elLetterActions.style.opacity = '0';
+      elLetterActions.style.pointerEvents = 'none';
+    }
+    if (elBtnEnterFinalStage) {
+      elBtnEnterFinalStage.disabled = false;
+    }
+    if (elCinematicEpilogue) {
+      elCinematicEpilogue.classList.remove('is-active');
+      elCinematicEpilogue.style.display = 'none';
+    }
+    if (elEpilogueRelive) {
+      elEpilogueRelive.style.display = 'none';
+    }
+
+    // 4. Reset film orchestrator & soundtrack director state
+    currentSceneIndex = -1;
+    isTransitioning = false;
+    isStarted = true;
+    completedScenes.clear();
+    scenesWithOutroPlayed.clear();
+    clearAllSceneTimers();
+    clearNarrative();
+
+    // Reset master soundtrack to 0:00 (force seek allowed on explicit replay)
+    soundtrack.hook1Triggered = false;
+    soundtrack.hook2Triggered = false;
+    soundtrack.seek(0, true);
+    soundtrack.unduck(0.1);
+    soundtrack.play();
+
+    // 5. Restore HUD & footer controls
+    if (elHud) elHud.style.display = '';
+    if (elFooter) elFooter.style.display = '';
+
+    // 6. Transition curtain to black and start Scene 0 (Spider-Man) afresh
+    elCurtain.classList.add('curtain--active');
+    setTimeout(() => {
+      goToScene(0);
+    }, 500);
+  }
+
+  // ── Orchestrator Show/Hide Finale Entrypoints ──
   function showFinale() {
     clearNarrative();
     elCurtain.classList.add('curtain--active');
     soundtrack.unduck();
 
     setTimeout(() => {
-      elFrame.src = 'about:blank';
-      elFinaleLetter.style.display = 'flex';
-      requestAnimationFrame(() => {
-        elCurtain.classList.remove('curtain--active');
-        elFinaleLetter.classList.add('is-active');
-        playCinematicLetter();
-      });
+      if (elFrame) elFrame.src = 'about:blank';
+      if (elHud) elHud.style.display = 'none';
+      if (elFooter) elFooter.style.display = 'none';
+
+      if (elFinaleLetter) {
+        elFinaleLetter.style.display = 'flex';
+        requestAnimationFrame(() => {
+          elCurtain.classList.remove('curtain--active');
+          elFinaleLetter.classList.add('is-active');
+          playCinematicLetter();
+        });
+      } else {
+        startCinematicEpilogue();
+      }
     }, 1000);
   }
 
   function hideFinale() {
-    elFinaleLetter.classList.remove('is-active');
-    if (letterAbortController) letterAbortController.aborted = true;
-    setTimeout(() => {
+    if (elFinaleLetter) {
+      elFinaleLetter.classList.remove('is-active');
+      if (letterAbortController) letterAbortController.aborted = true;
       elFinaleLetter.style.display = 'none';
-    }, 600);
+    }
+    if (elCinematicEpilogue) {
+      elCinematicEpilogue.classList.remove('is-active');
+      elCinematicEpilogue.style.display = 'none';
+    }
   }
+
+  // Wire personal birthday letter event listeners
+  if (elLetterCard) {
+    elLetterCard.addEventListener('click', e => {
+      if (e.target.closest('#btnEnterFinalStage')) return;
+      instantRevealAllLetter();
+    });
+  }
+
+  if (elBtnEnterFinalStage) {
+    elBtnEnterFinalStage.addEventListener('click', e => {
+      e.stopPropagation();
+      elBtnEnterFinalStage.disabled = true;
+
+      // Mysterious cinematic transition from letter to the final stage
+      if (window.gsap) {
+        gsap.to(elFinaleLetter, {
+          opacity: 0,
+          filter: 'blur(12px)',
+          scale: 0.98,
+          duration: 1.4,
+          ease: 'power2.inOut',
+          onComplete: () => {
+            if (elFinaleLetter) {
+              elFinaleLetter.classList.remove('is-active');
+              elFinaleLetter.style.display = 'none';
+              elFinaleLetter.style.opacity = '';
+              elFinaleLetter.style.filter = '';
+              elFinaleLetter.style.transform = '';
+            }
+            startCinematicEpilogue(true);
+            beginEpilogueRecording();
+          }
+        });
+      } else {
+        if (elFinaleLetter) {
+          elFinaleLetter.classList.remove('is-active');
+          elFinaleLetter.style.display = 'none';
+        }
+        startCinematicEpilogue(true);
+        beginEpilogueRecording();
+      }
+    });
+  }
+
+  // Wire epilogue event listeners
+  if (elBtnOpenEpilogue) {
+    elBtnOpenEpilogue.addEventListener('click', e => {
+      e.stopPropagation();
+      beginEpilogueRecording();
+    });
+  }
+
+  if (elBtnReliveStory) {
+    elBtnReliveStory.addEventListener('click', e => {
+      e.stopPropagation();
+      reliveStoryFromBeginning();
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    resizeBurstCanvas();
+    if (elEpilogueStarCanvas && elEpilogueStarCanvas.style.display !== 'none') {
+      initEpilogueStars();
+    }
+  });
 
   // ─────────────────────────────────────────────────────────────
   //  EVENTS & INTERACTION
@@ -930,7 +1717,7 @@
 
   function unlockAndPlayAudio() {
     if (soundtrack.ctx && soundtrack.ctx.state === 'suspended') {
-      soundtrack.ctx.resume().catch(() => {});
+      soundtrack.ctx.resume().catch(() => { });
     }
     if (!audioUnlocked || (soundtrack.audio && soundtrack.audio.paused && !soundtrack.isMuted)) {
       audioUnlocked = true;
@@ -986,27 +1773,6 @@
     }
   });
 
-  elBtnReplay.addEventListener('click', e => {
-    e.stopPropagation();
-    hideFinale();
-    completedScenes.clear();
-    scenesWithOutroPlayed.clear();
-    clearAllSceneTimers();
-    soundtrack.hook1Triggered = false;
-    soundtrack.hook2Triggered = false;
-    soundtrack.seek(0, true);
-    setTimeout(() => {
-      goToScene(0);
-    }, 500);
-  });
-
-  const elLetterCard = document.getElementById('letterCard');
-  if (elLetterCard) {
-    elLetterCard.addEventListener('click', e => {
-      if (e.target.closest('#btnReplay')) return;
-      instantRevealAllLetter();
-    });
-  }
 
   // Keyboard navigation for testing
   window.addEventListener('keydown', e => {

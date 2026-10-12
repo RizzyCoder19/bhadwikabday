@@ -598,7 +598,7 @@ body.film-started .ambient-footer {
 
 /* ── Final Personal Birthday Letter Screen (Clean, Restrained, Intimate) ── */
 .finale-letter-screen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 300;
   background: #08080a;
@@ -607,6 +607,7 @@ body.film-started .ambient-footer {
   justify-content: center;
   padding: clamp(20px, 4vw, 48px);
   overflow-y: auto;
+  box-sizing: border-box;
   opacity: 0;
   transition: opacity 1.2s ease;
 }
@@ -664,40 +665,22 @@ body.film-started .ambient-footer {
   transition: opacity 1s ease;
 }
 
-/* ── Cinematic Letter Penning ── */
+/* ── Cinematic Letter Word Fade In ── */
 .ink-word {
   display: inline-block;
   opacity: 0;
-  filter: blur(4px);
-  transform: translateY(4px);
-  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(8px);
+  transform: translateY(6px) scale(0.96);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, filter, transform;
 }
 
 .ink-word.is-revealed {
   opacity: 1;
   filter: blur(0);
-  transform: translateY(0);
-}
-
-.ink-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.1em;
-  background: #f59e0b;
-  margin-left: 2px;
-  vertical-align: -0.15em;
-  border-radius: 1px;
-  box-shadow: 0 0 10px #f59e0b, 0 0 20px rgba(245, 158, 11, 0.6);
-  animation: inkGlow 1s infinite alternate ease-in-out;
-  transition: opacity 0.3s ease;
-}
-
-@keyframes inkGlow {
-  0% { opacity: 0.4; transform: scaleY(0.9); }
-  100% { opacity: 1; transform: scaleY(1.1); box-shadow: 0 0 14px #ffd700, 0 0 25px rgba(255, 215, 0, 0.8); }
+  transform: translateY(0) scale(1);
 }
 
 .letter-skip-hint {
@@ -721,40 +704,549 @@ body.film-started .ambient-footer {
   cursor: pointer;
 }
 
-.letter-replay-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: rgba(255, 255, 255, 0.75);
-  font-family: 'Outfit', sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.16em;
+/* ── Mysterious "Enter the final stage..." Button ── */
+.final-stage-btn {
+  position: relative;
+  background: rgba(22, 10, 32, 0.75);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  color: #ffffff;
+  font-family: 'Cinzel', serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  padding: 12px 28px;
+  padding: 16px 38px;
   border-radius: 999px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 0 35px rgba(180, 20, 60, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.final-stage-btn .btn-glow-pulse {
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 105, 180, 0.25), transparent 70%);
+  animation: pulseButtonGlow 2.8s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+.final-stage-btn:hover {
+  background: rgba(36, 16, 52, 0.9);
+  border-color: #ffd700;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.55), 0 0 90px rgba(255, 105, 180, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.final-stage-btn .btn-sparkle {
+  color: #ffd700;
+  font-size: 14px;
+  animation: sparkleTwinkle 1.8s infinite alternate ease-in-out;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   THE CINEMATIC EPILOGUE (The Secret Final Chapter)
+   ═════════════════════════════════════════════════════════════════ */
+.cinematic-epilogue {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #030105;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cinematic-epilogue.is-active {
+  opacity: 1;
+}
+
+/* Atmospheric Wine / Crimson Background & Stardust */
+.epilogue-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.epilogue-ambient-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 85% 75% at 50% 50%, rgba(55, 12, 28, 0.5) 0%, rgba(28, 6, 16, 0.65) 55%, #030105 100%);
+}
+
+.epilogue-star-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── PHASE 1: Mysterious Invitation View ── */
+.epilogue-invitation-view {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.invitation-seal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.invitation-eyebrow {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 215, 0, 0.75);
+  margin: 0;
+}
+
+.invitation-ornament {
+  font-size: 14px;
+  color: rgba(255, 182, 193, 0.55);
+  letter-spacing: 0.2em;
+}
+
+.mystery-seal-btn {
+  position: relative;
+  background: rgba(22, 10, 30, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  color: #ffffff;
+  padding: 20px 42px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 45px rgba(180, 20, 60, 0.3), inset 0 0 25px rgba(255, 215, 0, 0.1);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.mystery-seal-btn .seal-halo {
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 105, 180, 0.2), transparent 70%);
+  animation: pulseButtonGlow 3s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+.mystery-seal-btn .seal-inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mystery-seal-btn .seal-icon {
+  font-size: 22px;
+  filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.7));
+}
+
+.mystery-seal-btn .seal-text {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.mystery-seal-btn .seal-sparkle {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-size: 11px;
+  color: #ffd700;
+  animation: sparkleTwinkle 2s infinite alternate ease-in-out;
+}
+
+.mystery-seal-btn:hover {
+  background: rgba(36, 14, 48, 0.9);
+  border-color: #ffd700;
+  box-shadow: 0 0 65px rgba(255, 215, 0, 0.6), 0 0 110px rgba(255, 105, 180, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.mystery-seal-btn:focus-visible {
+  outline: 2px solid #ffd700;
+  outline-offset: 4px;
+}
+
+.invitation-hint {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.epilogue-retry-btn {
+  background: rgba(255, 42, 95, 0.2);
+  border: 1px solid rgba(255, 42, 95, 0.5);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 10px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  margin-top: 10px;
   transition: all 0.3s ease;
 }
 
-.letter-replay-btn:hover {
-  border-color: rgba(255, 255, 255, 0.6);
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.06);
-  transform: translateY(-1px);
+.epilogue-retry-btn:hover {
+  background: rgba(255, 42, 95, 0.4);
 }
 
-.letter-replay-btn:hover {
-  background: rgba(255, 215, 0, 0.18);
-  border-color: #ffd700;
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 0 35px rgba(255, 215, 0, 0.45);
+/* ── PHASE 2, 3, 4: Active Epilogue Experience View ── */
+.epilogue-experience-view {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.replay-icon {
+/* Background Drifting Photo Lanes */
+.photo-lanes-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 1.5vh 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.photo-lane {
+  width: 100%;
+  height: clamp(175px, 29vh, 270px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.photo-lane-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 32px);
+  width: max-content;
+  will-change: transform;
+}
+
+.photo-lane--1 .photo-lane-track {
+  animation: driftLeft 72s linear infinite;
+}
+
+.photo-lane--2 .photo-lane-track {
+  animation: driftRight 84s linear infinite;
+}
+
+.photo-lane--3 .photo-lane-track {
+  animation: driftLeft 78s linear infinite;
+}
+
+@keyframes driftLeft {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes driftRight {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.photo-memory-card {
+  height: clamp(165px, 28vh, 255px);
+  width: auto;
+  min-width: clamp(115px, 17vw, 195px);
+  max-width: clamp(250px, 36vw, 380px);
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(14, 6, 18, 0.32);
+  border: 1px solid rgba(255, 215, 0, 0.26);
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 215, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0.94;
+  transition: opacity 0.5s ease;
+}
+
+.photo-memory-img {
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 11px;
+  display: block;
+  filter: contrast(1.05) saturate(1.08);
+}
+
+/* Subtle Feathered Contrast Mask (Leaves photos crisp and clearly visible) */
+.epilogue-typography-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(circle at 50% 50%, rgba(3, 1, 5, 0.3) 0%, rgba(3, 1, 5, 0.08) 60%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── PHASE 3: Massive Editorial Cinematic Typography (No Box, Pure Floating Camouflage) ── */
+.epilogue-typography-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+.cinematic-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2vh, 26px);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.92)) drop-shadow(0 0 45px rgba(0, 0, 0, 0.85));
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(12px, 2vw, 28px);
+}
+
+.t-word {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-size: clamp(36px, 6.4vw, 82px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  display: inline-block;
+  opacity: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 35%, #ffd700 80%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 0, 0, 0.75);
+  filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.45));
+  will-change: opacity, transform, filter;
+}
+
+.t-word.t-word--italic {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe4e6 50%, #fecdd3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 0, 0, 0.75);
+  filter: drop-shadow(0 0 25px rgba(255, 182, 193, 0.45));
+}
+
+.t-word.t-word--accent {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffd700 0%, #ff758f 45%, #ff1744 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 42, 95, 0.4);
+  filter: drop-shadow(0 0 35px rgba(255, 42, 95, 0.75));
+}
+
+.t-heart {
+  display: inline-block;
+  opacity: 0;
+  font-size: clamp(34px, 6vw, 76px);
+  margin-left: 8px;
+  filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 35px rgba(255, 23, 68, 0.85));
+  will-change: opacity, transform;
+}
+
+/* ── PHASE 5: Canvas for Multi-Focal Layered Heart Burst ── */
+.epilogue-burst-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── PHASE 6: Black Void & Final Replay Invitation View ── */
+.epilogue-relive-view {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.relive-card {
+  text-align: center;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.relive-crest {
+  font-size: 26px;
+  color: #ffd700;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.7));
+  animation: crestPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes crestPulse {
+  0% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+  100% { transform: scale(1.15) rotate(45deg); opacity: 1; }
+}
+
+.relive-quote {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(26px, 4.2vw, 44px);
+  font-weight: 400;
+  line-height: 1.35;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #fef3c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
+  margin: 0;
+  padding: 0 16px;
+}
+
+.relive-subtext {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(11px, 1.6vw, 13px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+  margin: 0 0 12px 0;
+}
+
+.relive-cinematic-btn {
+  position: relative;
+  background: rgba(16, 8, 24, 0.75);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 18px 44px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255, 215, 0, 0.1);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.relive-cinematic-btn .btn-luminous-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.22), transparent 70%);
+  animation: pulseButtonGlow 2.6s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+.relive-cinematic-btn .btn-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.relive-cinematic-btn .btn-arrow {
+  color: #ffd700;
   font-size: 16px;
+  transition: transform 0.4s ease;
+}
+
+.relive-cinematic-btn:hover {
+  background: rgba(32, 16, 48, 0.9);
+  border-color: #ffd700;
+  box-shadow: 0 0 55px rgba(255, 215, 0, 0.65), 0 0 110px rgba(255, 105, 180, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.relive-cinematic-btn:hover .btn-arrow {
+  transform: rotate(180deg);
+}
+
+.relive-cinematic-btn:focus-visible {
+  outline: 2px solid #ffd700;
+  outline-offset: 4px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .photo-lane-track {
+    animation: none !important;
+  }
+  .mystery-seal-btn, .relive-cinematic-btn, .cinematic-title {
+    animation: none !important;
+    transition: none !important;
+  }
+  .epilogue-burst-canvas {
+    display: none !important;
+  }
 }
 
 /* ── Tablet & Mobile Viewports (iPad & Tablet Optimizations) ── */

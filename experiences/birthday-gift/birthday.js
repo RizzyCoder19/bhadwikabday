@@ -898,13 +898,7 @@ function enter() {
 
   const tl = gsap.timeline({ onComplete: () => {
     startBeat();
-    if (window.parent && window.parent !== window) {
-      setTimeout(() => {
-        if (!played && !drawing) {
-          autoFire();
-        }
-      }, 5500);
-    }
+    // Do not auto-fire: let the user interactively drag the bow and release towards the heart!
   }});
   tl.to(target, { opacity: 1, y: 0, scaleX: 1, scaleY: 1, duration: 0.8, ease: 'power3.out' }, 0.1)
     .to(heartGlow, { opacity: 0.7, duration: 0.8, ease: 'power2.out' }, 0.2)
@@ -913,11 +907,11 @@ function enter() {
     .to(hint, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.7);
 }
 
-// Hook 2 beat drop listener (2:04 / 124.0s)
+// Hook 2 beat drop listener — gentle pulse hint instead of forcing autoFire
 window.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'CASA_TRIGGER_GIFT_FIRE') {
     if (!played) {
-      autoFire();
+      gsap.to(targetHeart, { scale: 1.15, repeat: 3, yoyo: true, duration: 0.25, ease: 'sine.inOut' });
     }
   }
 });
