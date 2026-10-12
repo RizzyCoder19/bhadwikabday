@@ -269,7 +269,23 @@ body{
   margin-bottom:clamp(2px,1vh,10px);
 }
 
-.headline{ font-family:"Fraunces", Georgia, serif; line-height:.92; }
+.headline{
+  font-family:"Fraunces", Georgia, serif;
+  line-height:1.04;
+  position:relative;
+  z-index:2;
+}
+.headline::before{
+  content:"";
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  width:140%; height:140%;
+  background:radial-gradient(ellipse at center, rgba(255,230,210,.25) 0%, rgba(226,59,103,.18) 45%, transparent 75%);
+  filter:blur(24px);
+  pointer-events:none;
+  z-index:-1;
+}
 .hl__line{ display:block; }
 /* the mask each headline word hinges out of. Padded to clear ascenders +
    descenders so glyphs never peek past the clip edge when parked. */
@@ -281,11 +297,11 @@ body{
 .hl__word{
   display:inline-block;
   font-weight:900;
-  font-size:clamp(32px, 7.2vw, 84px);
-  letter-spacing:-.02em;
-  color:#fff6f1;
-  text-shadow:0 6px 34px rgba(60,4,24,.34), 0 2px 3px rgba(90,8,36,.42);
-  white-space: nowrap;
+  font-size:clamp(40px, 9.5vw, 112px);
+  letter-spacing:-.015em;
+  color:#fff8f5;
+  text-shadow:0 8px 40px rgba(60,4,24,.45), 0 2px 4px rgba(90,8,36,.5), 0 0 25px rgba(255,220,200,.35);
+  white-space:nowrap;
 }
 /* each glyph hinges up on its own bottom edge, under its own perspective */
 .hl__ch{ display:inline-block; will-change:transform; }
@@ -332,70 +348,78 @@ body{
    ============================================================ */
 .wish{
   position:absolute;
-  left:5.5%; bottom:10%;
-  max-width:46%;
+  left:50%; bottom:7%;
+  transform:translateX(-50%);
+  width:92%; max-width:960px;
+  text-align:center;
   z-index:6;
   pointer-events:none;
   color:var(--ink);
-  /* hard gate: wish__hero keeps opacity:1 (its clip-path drives the write-on),
-     so without this its clipped sliver + drop-shadow would leak into Acts 1–3. */
   visibility:hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 }
 .wish.is-in{ visibility:visible; }
 .wish::before{
-  content:""; position:absolute; inset:-18% -24% -24% -16%;
-  background:radial-gradient(84% 98% at 34% 52%, rgba(255,250,243,.94), rgba(255,250,243,.6) 48%, rgba(255,250,243,0) 80%);
+  content:""; position:absolute; inset:-24% -20% -24% -20%;
+  background:radial-gradient(ellipse at center, rgba(255,250,243,.96) 0%, rgba(255,250,243,.75) 50%, rgba(255,250,243,0) 80%);
   z-index:-1; opacity:0; transition:opacity 1s ease;
+  border-radius:40px; filter:blur(8px);
 }
 .wish.is-in::before{ opacity:1; }
 .wish__eyebrow{
   font-family:"Cormorant Garamond", Georgia, serif;
   font-style:italic; font-weight:600;
-  font-size:clamp(13px, 3.2vw, 24px);
-  letter-spacing:.05em; color:#9c4f63;
-  text-shadow:0 1px 2px #fff8f1, 0 0 8px rgba(255,248,241,.95);
+  font-size:clamp(15px, 3.4vw, 26px);
+  letter-spacing:.06em; color:#9c4f63;
+  text-shadow:0 1px 2px #fff8f1, 0 0 10px rgba(255,248,241,.98);
+  margin-bottom:0.1em;
 }
-.wish__heroWrap{ position:relative; display:inline-block; }
+.wish__heroWrap{
+  position:relative;
+  display:inline-block;
+  text-align:center;
+  transform-origin:center center;
+}
 .wish__heroWrap::before{
-  content:""; position:absolute; left:-12%; right:-12%; top:-26%; bottom:-22%;
-  background:radial-gradient(60% 70% at 46% 52%, rgba(255,214,168,.5), rgba(255,150,150,.2) 52%, transparent 74%);
-  filter:blur(14px); z-index:-1; opacity:0; pointer-events:none;
+  content:""; position:absolute; left:-14%; right:-14%; top:-28%; bottom:-22%;
+  background:radial-gradient(60% 70% at 50% 50%, rgba(255,214,168,.55), rgba(255,150,150,.22) 52%, transparent 74%);
+  filter:blur(16px); z-index:-1; opacity:0; pointer-events:none;
 }
 .wish__heroWrap::after{
   content:"\2726";
-  position:absolute; right:-1%; top:-14%;
-  font-size:clamp(15px, 3.6vw, 32px);
-  color:#ffe1a0; text-shadow:0 0 12px rgba(255,205,120,.95);
+  position:absolute; right:-2%; top:-14%;
+  font-size:clamp(18px, 4vw, 36px);
+  color:#ffe1a0; text-shadow:0 0 14px rgba(255,205,120,.95);
   opacity:0; pointer-events:none;
 }
 .wish__hero{
   font-family:"Great Vibes", cursive; font-weight:400;
-  font-size:clamp(30px, 6.8vw, 68px);
-  line-height:1.05; margin:-.02em 0 .06em;
+  font-size:clamp(38px, 8.8vw, 88px);
+  line-height:1.1; margin:-.02em 0 .06em;
   white-space: nowrap;
-  /* one consistent rose, top-lit — every letter reads the same (no per-glyph
-     colour shift, which is what made the old rose→gold version look messy).
-     Deep enough to hold up against the tree's bright bloom behind it. */
-  background:linear-gradient(180deg, #e85a83 0%, #c41f52 50%, #9c0f42 100%);
+  text-align:center;
+  background:linear-gradient(180deg, #ea580c 0%, #e11d48 45%, #9f1239 100%);
   -webkit-background-clip:text; background-clip:text; color:transparent;
-  /* a crisp cream edge for legibility over the tree + one soft drop */
   filter:
-    drop-shadow(0 1px 1px rgba(255,252,248,.98))
-    drop-shadow(0 2px 6px rgba(130,18,55,.45));
+    drop-shadow(0 1px 2px rgba(255,252,248,.98))
+    drop-shadow(0 4px 16px rgba(159,18,57,.45));
   clip-path:inset(0 100% -28% -10%);
-  transform-origin:8% 60%;             /* breathe from the start of the line */
+  transform-origin:center center;
 }
 .wish__rule{
-  display:block; width:clamp(46px, 13vw, 110px); height:2px;
-  margin:.12em 0 .48em;
-  background:linear-gradient(90deg, var(--gold-2), rgba(232,162,61,0));
-  box-shadow:0 0 8px rgba(255,247,240,.9);
-  transform-origin:left center;
+  display:block; width:clamp(60px, 16vw, 140px); height:2.5px;
+  margin:.14em auto .48em;
+  background:linear-gradient(90deg, rgba(232,162,61,0), var(--gold-2) 50%, rgba(232,162,61,0));
+  box-shadow:0 0 10px rgba(255,247,240,.95);
+  transform-origin:center center;
 }
 .wish__sub{
   font-family:"Cormorant Garamond", Georgia, serif;
-  font-weight:600; font-size:clamp(12px, 2.9vw, 20px);
-  letter-spacing:.03em; color:#6e3f4a;
+  font-weight:600; font-size:clamp(14px, 3.2vw, 22px);
+  letter-spacing:.04em; color:#6e3f4a;
   text-shadow:0 1px 2px #fff8f1, 0 0 8px rgba(255,248,241,.98);
 }
 .wish__eyebrow, .wish__rule, .wish__sub{
@@ -413,7 +437,7 @@ body{
             wishBreath 4s ease-in-out 1.9s infinite;
 }
 /* a gentle living breath — transform only, so it can never wash the fill out */
-@keyframes wishBreath{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.02); } }
+@keyframes wishBreath{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.03); } }
 .wish.is-in .wish__heroWrap::before{ animation:hlin .8s ease .3s forwards, hlpulse 3.4s ease-in-out 1.7s infinite; }
 .wish.is-in .wish__heroWrap::after{ animation:twk 2.6s ease-in-out 1.6s infinite; }
 @keyframes write{ from{ clip-path:inset(0 100% -28% -10%); } to{ clip-path:inset(0 -10% -28% -10%); } }

@@ -1,5 +1,5 @@
 /**
- * CASA TANVI — A CINEMATIC 20TH BIRTHDAY FILM FOR TANVI
+ * CASA TANVI — A CINEMATIC 14TH BIRTHDAY FILM FOR TANVI
  * Master Orchestrator, Soundtrack Director & Narrative Choreographer
  * Synchronized with "Lut Gaye" Musical Hooks:
  *   - Hook 1 (0:44): Heartbeat Collision Explosion & Golden Heart Merge
@@ -90,7 +90,7 @@
       number: '06',
       url: './experiences/birthday-cake/index.html',
       introNarrative: [
-        { text: "Every celebration begins with a flame…", sub: "Make your 20th wish and touch the candle to blow it out.", duration: 4600 }
+        { text: "Every celebration begins with a flame…", sub: "Make your 14th wish and touch the candle to blow it out.", duration: 4600 }
       ],
       outroNarrative: null,
       autoContinueDelay: 22000,
@@ -104,7 +104,7 @@
       url: './experiences/love-heart/index.html',
       introNarrative: null,
       outroNarrative: [
-        { text: "Happy 20th birthday, Tanvi. ❤️", sub: "", duration: 4200 },
+        { text: "Happy 14th birthday, Tanvi. ❤️", sub: "", duration: 4200 },
         { text: "Until I can be there to hold you in person,", sub: "Here's a world made just for you, with all my love.", duration: 4800 },
         { text: "No matter how many miles sit between us,", sub: "I'm grateful every single day that I found you.", duration: 5000 }
       ],
@@ -787,7 +787,7 @@
     { id: 'letterGreeting', text: 'Happy birthday, baby. ❤️', pauseAfter: 700 },
     { id: 'letterPara1', text: 'I really wish I could be there with you yesterday. I wanted to give you something that felt a little more personal than just a text, so I spent my time making this little corner of the internet for you.', pauseAfter: 650 },
     { id: 'letterPara2', text: "I know it isn't the same as being there to hold you in person, and the one i originally spent my entire time making.. but I hope it made you smile. Through every fight, every late-night conversation, and every mile between Mumbai and Howrah, I'm just really grateful for you.", pauseAfter: 650 },
-    { id: 'letterPara3', text: 'Happy 20th, Tanvi. Meri bhadwi, meri cuttiya. I love you.', pauseAfter: 800 },
+    { id: 'letterPara3', text: 'Happy 14th, Tanvi. Meri bhadwi, meri cuttiya. I love you.', pauseAfter: 800 },
     { id: 'letterSign', text: '— Umar', pauseAfter: 500 }
   ];
 
