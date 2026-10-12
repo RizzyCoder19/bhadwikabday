@@ -1,0 +1,1267 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ã°Å¸â€™â€œ Heartbeat Sync Ã¢â‚¬â€ Two Hearts, One Beat</title>
+  <meta name="description"
+    content="A romantic particle animation Ã¢â‚¬â€ two hearts beat, approach each other, and merge into one." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Great+Vibes&family=Outfit:wght@300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: #020002;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      user-select: none;
+    }
+
+    canvas#main {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Cinematic Control Bar (Subtle Floating Glass Replay) Ã¢â€â‚¬Ã¢â€â‚¬ */
+    body.is-embedded #controlBar {
+      display: none !important;
+    }
+
+    #controlBar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      opacity: 0.65;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #controlBar:hover {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .ctrl-btn {
+      padding: 9px 24px;
+      border-radius: 50px;
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      background: rgba(12, 8, 22, 0.7);
+      backdrop-filter: blur(16px);
+      color: #e9d5ff;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 20px rgba(192, 132, 252, 0.2);
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(192, 132, 252, 0.22);
+      border-color: rgba(192, 132, 252, 0.7);
+      color: #ffffff;
+      box-shadow: 0 0 26px rgba(192, 132, 252, 0.45);
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="main"></canvas>
+
+  <!-- Cinematic replay control (standalone only) -->
+  <div id="controlBar">
+    <button class="ctrl-btn" id="btn-restart" title="Replay">&#x21bb; Replay</button>
+  </div>
+
+  <script>
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  HEARTBEAT SYNC  Ã‚Â·  Romantic Particle Animation
+    //  Authentic Original Artwork & Coordination Engine
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+    const isEmbedded = (window.parent && window.parent !== window);
+    if (isEmbedded) {
+      document.body.classList.add('is-embedded');
+      const cb = document.getElementById('controlBar');
+      if (cb) cb.style.display = 'none';
+    }
+
+    const canvas = document.getElementById('main');
+    const ctx = canvas.getContext('2d');
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Config Ã¢â€â‚¬Ã¢â€â‚¬
+    const CFG = {
+      name1: 'Umar',
+      name2: 'Tanvi',
+      msg: 'Two Hearts, One Beat',
+      sub: 'Forever Yours',
+      color1: { main: '#ffffff', glow: 'rgba(255,255,255,0.85)', dark: '#e0e0e0' }, // Luminous Diamond-White
+      color2: { main: '#4fa8ff', glow: 'rgba(79,168,255,0.85)', dark: '#1a70cc' }, // Sapphire Sky-Blue
+      merged: { main: '#c084fc', glow: 'rgba(192,132,252,0.85)', dark: '#7c3aed' }, // Radiant Lavender
+      speed: 1.0,
+      sound: true,
+    };
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Resize Ã¢â€â‚¬Ã¢â€â‚¬
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
+    let W = window.innerWidth, H = window.innerHeight;
+
+    function getHeartScale() {
+      const minDim = Math.min(W, H);
+      return W < 600 ? Math.max(4.5, minDim * 0.013) : Math.max(7.0, minDim * 0.012);
+    }
+
+    function onWindowResize() {
+      resize();
+      if (!state.isPlaying) {
+        state.lx = -W * 0.25; state.ly = H * 0.45;
+        state.rx = W * 1.25; state.ry = H * 0.45;
+        state.cx = W * 0.50; state.cy = H * 0.45;
+        initParticles();
+      } else {
+        state.cx = W * 0.50;
+        state.cy = H * 0.45;
+        if (state.phase >= PHASE.MERGE) {
+          const scale = getHeartScale() * 1.25;
+          const goldenOffsets = sampleHeartOffsets(scale, particles.length);
+          for (let i = 0; i < particles.length; i++) {
+            const off = goldenOffsets[i % goldenOffsets.length];
+            particles[i].mRelX = off.relX;
+            particles[i].mRelY = off.relY;
+          }
+        }
+      }
+    }
+    window.addEventListener('resize', onWindowResize);
+    resize();
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  WEB AUDIO SYNTHESIZER
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    let audioCtx = null;
+    let pannerL = null, pannerR = null, pannerC = null;
+    let bgmIntervalId = null, bgmStep = 0, bgmPlaying = false;
+
+    function initAudio() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+      }
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        if (audioCtx.createStereoPanner) {
+          pannerL = audioCtx.createStereoPanner(); pannerL.pan.value = -0.65; pannerL.connect(audioCtx.destination);
+          pannerR = audioCtx.createStereoPanner(); pannerR.pan.value = 0.65; pannerR.connect(audioCtx.destination);
+          pannerC = audioCtx.createStereoPanner(); pannerC.pan.value = 0.0; pannerC.connect(audioCtx.destination);
+        } else {
+          pannerL = audioCtx.destination;
+          pannerR = audioCtx.destination;
+          pannerC = audioCtx.destination;
+        }
+      } catch (e) { }
+    }
+
+    function playHeartbeat(side, intensity = 1.0) {
+      if (!CFG.sound || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const panner = side === 'L' ? pannerL : side === 'R' ? pannerR : pannerC;
+
+      // Lub
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      const freq1 = side === 'C' ? 52 : side === 'L' ? 62 : 56;
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq1, now);
+      osc1.frequency.exponentialRampToValueAtTime(30, now + 0.16);
+      gain1.gain.setValueAtTime(0.001, now);
+      gain1.gain.linearRampToValueAtTime(0.38 * intensity, now + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc1.connect(gain1); gain1.connect(panner);
+      osc1.start(now); osc1.stop(now + 0.20);
+
+      // Dub
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      const freq2 = side === 'C' ? 44 : side === 'L' ? 50 : 47;
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq2, now + 0.11);
+      osc2.frequency.exponentialRampToValueAtTime(26, now + 0.28);
+      gain2.gain.setValueAtTime(0.001, now + 0.11);
+      gain2.gain.linearRampToValueAtTime(0.24 * intensity, now + 0.13);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.30);
+      osc2.connect(gain2); gain2.connect(panner);
+      osc2.start(now + 0.11); osc2.stop(now + 0.32);
+    }
+
+    function playChordSwell(notes, duration = 2.0) {
+      if (!CFG.sound || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), filter = audioCtx.createBiquadFilter();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.08);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1800, now + i * 0.08);
+        filter.frequency.exponentialRampToValueAtTime(300, now + i * 0.08 + duration);
+        gain.gain.setValueAtTime(0, now + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.055, now + i * 0.08 + 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + duration);
+        osc.connect(filter); filter.connect(gain); gain.connect(pannerC);
+        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + duration + 0.1);
+      });
+    }
+
+    function playMergeExplosion() {
+      if (!CFG.sound || !audioCtx) return;
+      playChordSwell([130.81, 164.81, 196, 261.63, 329.63, 392, 523.25], 3.0);
+      const now = audioCtx.currentTime;
+      const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.6, audioCtx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+      const src = audioCtx.createBufferSource(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 120;
+      g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      src.buffer = buf; src.connect(f); f.connect(g); g.connect(pannerC);
+      src.start(now); src.stop(now + 0.6);
+    }
+
+    function playHeartReveal() {
+      if (!CFG.sound || !audioCtx) return;
+      playChordSwell([220, 261.63, 329.63, 392, 523.25, 659.25], 2.8);
+    }
+
+    const BGM_NOTES = [
+      174.61, 220.00, 261.63, 329.63, 440.00, 523.25,
+      196.00, 246.94, 293.66, 329.63, 392.00, 493.88,
+      220.00, 261.63, 329.63, 392.00, 440.00, 523.25,
+      164.81, 196.00, 246.94, 293.66, 329.63, 392.00,
+    ];
+    function playMusicBoxNote(freq, dur = 2.2) {
+      if (!CFG.sound || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), filt = audioCtx.createBiquadFilter();
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
+      filt.type = 'lowpass'; filt.frequency.setValueAtTime(900, now); filt.frequency.exponentialRampToValueAtTime(140, now + dur);
+      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.055, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.connect(filt); filt.connect(gain); gain.connect(pannerC);
+      osc.start(now); osc.stop(now + dur);
+    }
+    function startBGM() {
+      if (isEmbedded) return; // Master film soundtrack "Lut Gaye" plays in parent
+      if (bgmPlaying) return;
+      bgmPlaying = true; bgmStep = 0;
+      bgmIntervalId = setInterval(() => {
+        if (!bgmPlaying) return;
+        const ci = Math.floor(bgmStep / 8) % 4;
+        const co = ci * 6;
+        const si = bgmStep % 8;
+        const ni = [0, 2, 4, 3, 5, 4, 2, 1][si];
+        const freq = BGM_NOTES[co + ni] * (Math.random() < 0.2 && si > 2 ? 2 : 1);
+        playMusicBoxNote(freq, 2.2);
+        bgmStep++;
+      }, 820);
+    }
+    function stopBGM() {
+      bgmPlaying = false;
+      if (bgmIntervalId) { clearInterval(bgmIntervalId); bgmIntervalId = null; }
+    }
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  PARENT HANDSHAKE & MUSICAL SYNC LISTENERS
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    let pendingCollisionTrigger = false;
+
+    window.addEventListener('message', e => {
+      if (!e.data) return;
+
+      if (e.data.type === 'CASA_START') {
+        if (!state.isPlaying) {
+          startAnimation();
+        }
+        if (pendingCollisionTrigger) {
+          pendingCollisionTrigger = false;
+          state.collisionTriggered = true;
+          if (state.phase === PHASE.FLY_IN) {
+            enterPhase(PHASE.COLLIDE);
+          }
+        }
+        return;
+      }
+
+      if (e.data.type === 'CASA_TRIGGER_COLLIDE') {
+        if (state.hasExploded || state.phase >= PHASE.COLLIDE) return;
+        state.collisionTriggered = true;
+
+        if (state.isPlaying && state.phase === PHASE.FLY_IN) {
+          enterPhase(PHASE.COLLIDE);
+        } else {
+          pendingCollisionTrigger = true;
+        }
+        return;
+      }
+    });
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  PARTICLE SYSTEM (Authentic Original Vector Design)
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+    // Draw a tiny vector heart (Ultra-fast, zero-overhead direct bezier, 60fps)
+    function drawHeart(ctx, x, y, size, color, alpha) {
+      if (alpha <= 0.005) return;
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.fillStyle = color;
+      const s = size;
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.3);
+      ctx.bezierCurveTo(x, y - s * 0.45, x - s * 0.95, y - s * 0.45, x - s * 0.95, y + s * 0.2);
+      ctx.bezierCurveTo(x - s * 0.95, y + s * 0.7, x - s * 0.45, y + s * 1.05, x, y + s * 1.4);
+      ctx.bezierCurveTo(x + s * 0.45, y + s * 1.05, x + s * 0.95, y + s * 0.7, x + s * 0.95, y + s * 0.2);
+      ctx.bezierCurveTo(x + s * 0.95, y - s * 0.45, x, y - s * 0.45, x, y + s * 0.3);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Sample parametric heart relative offsets (crisp contour + bounded interior)
+    function sampleHeartOffsets(scale, count) {
+      const pts = [];
+      const outlineCount = Math.floor(count * 0.55);
+      const fillCount = count - outlineCount;
+
+      // 1. Crisp outline contour points
+      for (let i = 0; i < outlineCount; i++) {
+        const t = (i / outlineCount) * Math.PI * 2;
+        const bx = 16 * Math.pow(Math.sin(t), 3);
+        const by = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        pts.push({ relX: bx * scale, relY: by * scale });
+      }
+
+      // 2. Interior fill points (strictly bounded inside exact parametric contour)
+      const cyCenter = -2.5;
+      for (let i = 0; i < fillCount; i++) {
+        const t = Math.random() * Math.PI * 2;
+        const r = 0.10 + 0.80 * Math.sqrt(Math.random());
+        const bx = 16 * Math.pow(Math.sin(t), 3);
+        const by = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        const intX = bx * r;
+        const intY = cyCenter + (by - cyCenter) * r;
+        pts.push({ relX: intX * scale, relY: intY * scale });
+      }
+      return pts;
+    }
+
+    // Pre-calculated ECG waveform points
+    const ECG_WAVE_TOTAL = 200;
+    const ECG_WAVEFORM = [];
+    (function initECG() {
+      const spikePct = 0.55;
+      for (let idx = 0; idx < ECG_WAVE_TOTAL; idx++) {
+        const t = idx / ECG_WAVE_TOTAL;
+        let y = 0;
+        if (t < spikePct - 0.12) { y = 0; }
+        else if (t < spikePct - 0.05) { y = Math.sin((t - (spikePct - 0.12)) / 0.07 * Math.PI) * 0.18; }
+        else if (t < spikePct) { y = -1.0 * Math.pow(Math.sin(((t - (spikePct - 0.05)) / 0.05) * Math.PI), 2); }
+        else if (t < spikePct + 0.05) { y = 0.65 * Math.sin(((t - spikePct) / 0.05) * Math.PI); }
+        else { y = 0; }
+        ECG_WAVEFORM.push({ t, y });
+      }
+    })();
+
+    // Particle pool
+    const PARTICLE_COUNT = 1400; // 700 per heart
+    let particles = [];
+    let stars = [];
+    let fallingHearts = [];
+    let flyTrailParticles = [];
+
+    function createParticle(x, y, relX, relY, color, side) {
+      return {
+        x, y,
+        tx: x, ty: y,
+        relX: relX || 0,
+        relY: relY || 0,
+        vx: 0, vy: 0,
+        size: 3.2 + Math.random() * 3.5,
+        color,
+        alpha: 0.0,
+        targetAlpha: 0.92,
+        side, // 'L' | 'R' | 'C'
+        swayPhase: Math.random() * Math.PI * 2,
+      };
+    }
+
+    function initParticles() {
+      particles = [];
+      stars = [];
+      fallingHearts = [];
+      flyTrailParticles = [];
+
+      // Stars
+      for (let i = 0; i < 120; i++) {
+        stars.push({
+          x: Math.random() * W, y: Math.random() * H,
+          r: 0.5 + Math.random() * 1.6,
+          alpha: Math.random(),
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.5 + Math.random() * 1.5,
+        });
+      }
+
+      const halfL = Math.floor(PARTICLE_COUNT / 2);
+      const halfR = PARTICLE_COUNT - halfL;
+      const scale = getHeartScale();
+
+      const lOffsets = sampleHeartOffsets(scale, halfL);
+      const rOffsets = sampleHeartOffsets(scale, halfR);
+      const goldenOffsets = sampleHeartOffsets(scale * 1.25, PARTICLE_COUNT);
+
+      for (let i = 0; i < halfL; i++) {
+        const off = lOffsets[i];
+        const gOff = goldenOffsets[i % goldenOffsets.length];
+        const p = createParticle(-W * 0.25 + off.relX, H * 0.45 + off.relY, off.relX, off.relY, CFG.color1.main, 'L');
+        p.mRelX = gOff.relX; p.mRelY = gOff.relY;
+        p.swirlSign = (i % 2 === 0 ? 1 : -1) * (0.6 + (i % 5) * 0.12);
+        particles.push(p);
+      }
+
+      for (let i = 0; i < halfR; i++) {
+        const off = rOffsets[i];
+        const gOff = goldenOffsets[(i + halfL) % goldenOffsets.length];
+        const p = createParticle(W * 1.25 + off.relX, H * 0.45 + off.relY, off.relX, off.relY, CFG.color2.main, 'R');
+        p.mRelX = gOff.relX; p.mRelY = gOff.relY;
+        p.swirlSign = (i % 2 === 0 ? 1 : -1) * (0.6 + (i % 5) * 0.12);
+        particles.push(p);
+      }
+    }
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  TIMELINE STATE MACHINE
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    const PHASE = {
+      IDLE: 0,
+      INTRO: 1, // stars fade in
+      FLY_IN: 2, // hearts approach smoothly and decelerate inward
+      COLLIDE: 3, // impact explosion & shockwaves
+      MERGE: 4, // reform into ONE BIG GOLDEN LAVENDER HEART
+      ECG: 5, // ECG drama line across bottom
+      MSG_REVEAL: 6, // "Two Hearts, One Beat" text
+      FINALE: 7, // Finale names, gentle heart rain, click interactive
+    };
+
+    const PHASE_DUR = {
+      [PHASE.INTRO]: 2.0, // stars fade in gently
+      [PHASE.FLY_IN]: 8.0, // smooth cinematic approach over 8.0 seconds
+      [PHASE.COLLIDE]: 2.0, // impact explosion & shockwaves
+      [PHASE.MERGE]: 7.0, // golden lavender heart 4-side slow inflow
+      [PHASE.ECG]: 4.5, // ECG line pulse
+      [PHASE.MSG_REVEAL]: 6.5, // message and names reveal
+      [PHASE.FINALE]: 9999,
+    };
+
+    let state = {
+      phase: PHASE.IDLE,
+      elapsed: 0,
+      globalTime: 0,
+      isPlaying: false,
+      lastFrame: 0,
+
+      collisionTriggered: false,
+
+      // Heart centers
+      lx: 0, ly: 0,
+      rx: 0, ry: 0,
+      cx: 0, cy: 0,
+
+      // Pulse state
+      lBeat: 0, rBeat: 0, cBeat: 0,
+      lastLBeat: 0, lastRBeat: 0, lastCBeat: 0,
+      beatInterval: 0,
+
+      // Collision explosion
+      hasExploded: false,
+      shockwaveR: 0,
+      shockwaveAlpha: 0,
+      shockwave2R: 0,
+      shockwave2Alpha: 0,
+      flashAlpha: 0,
+
+      // ECG
+      ecgPoints: [],
+      ecgProgress: 0,
+      ecgFlat: false,
+      ecgSpiked: false,
+
+      // Text
+      msgParticles: [],
+      nameTextAlpha: 0,
+      msgAlpha: 0,
+      finaleAlpha: 0,
+
+      // Click hearts
+      clickHearts: [],
+    };
+
+    let finaleTimer = null;
+
+    function enterPhase(ph) {
+      state.phase = ph;
+      state.elapsed = 0;
+
+      if (ph === PHASE.FLY_IN) {
+        state.lx = -W * 0.25; state.ly = H * 0.45;
+        state.rx = W * 1.25; state.ry = H * 0.45;
+        state.cx = W * 0.50; state.cy = H * 0.45;
+        state.beatInterval = 1.35 / CFG.speed;
+        state.lBeat = 0; state.rBeat = 0;
+        state.nameTextAlpha = 0;
+
+        const half = Math.floor(particles.length / 2);
+        for (let i = 0; i < half; i++) {
+          const p = particles[i];
+          p.x = state.lx + p.relX; p.y = state.ly + p.relY;
+          p.tx = p.x; p.ty = p.y;
+          p.color = CFG.color1.main; p.side = 'L';
+          p.alpha = 0.92; p.targetAlpha = 0.92;
+          p.vx = 0; p.vy = 0;
+        }
+        for (let i = half; i < particles.length; i++) {
+          const p = particles[i];
+          p.x = state.rx + p.relX; p.y = state.ry + p.relY;
+          p.tx = p.x; p.ty = p.y;
+          p.color = CFG.color2.main; p.side = 'R';
+          p.alpha = 0.92; p.targetAlpha = 0.92;
+          p.vx = 0; p.vy = 0;
+        }
+        startBGM();
+      }
+
+      if (ph === PHASE.COLLIDE) {
+        state.lx = W * 0.50;
+        state.rx = W * 0.50;
+        state.nameTextAlpha = 0;
+        state.hasExploded = false;
+        state.shockwaveR = 0; state.shockwaveAlpha = 0;
+        state.shockwave2R = 0; state.shockwave2Alpha = 0;
+        state.flashAlpha = 0;
+      }
+
+      if (ph === PHASE.MERGE) {
+        state.nameTextAlpha = 0;
+        playHeartReveal();
+        const scale = getHeartScale() * 1.25;
+        const goldenOffsets = sampleHeartOffsets(scale, particles.length);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const off = goldenOffsets[i % goldenOffsets.length];
+          p.mRelX = off.relX;
+          p.mRelY = off.relY;
+
+          const side = i % 4;
+          if (side === 0) { p.startX = Math.random() * W; p.startY = -60; }
+          else if (side === 1) { p.startX = W + 60; p.startY = Math.random() * H; }
+          else if (side === 2) { p.startX = Math.random() * W; p.startY = H + 60; }
+          else { p.startX = -60; p.startY = Math.random() * H; }
+
+          p.delay = (i % 35) * 0.045;
+          p.curveDir = ((i % 2 === 0) ? 1 : -1) * (15 + (i % 5) * 12);
+          p.color = CFG.merged.main;
+          p.side = 'C';
+          p.alpha = 0.0;
+          p.targetAlpha = 0.95;
+          p.x = p.startX;
+          p.y = p.startY;
+        }
+      }
+
+      if (ph === PHASE.ECG) {
+        state.ecgPoints = [];
+        state.ecgProgress = 0;
+        state.ecgFlat = true;
+        state.ecgSpiked = false;
+      }
+
+      if (ph === PHASE.MSG_REVEAL) {
+        state.msgAlpha = 0;
+        state.finaleAlpha = 0;
+      }
+
+      if (ph === PHASE.FINALE) {
+        state.finaleAlpha = 0;
+        if (finaleTimer) clearTimeout(finaleTimer);
+        finaleTimer = setTimeout(() => {
+          try {
+            window.parent?.postMessage({ type: 'CASA_SCENE_FINISHED', scene: 'heartbeat-sync' }, '*');
+          } catch (e) { }
+        }, 14000);
+      }
+    }
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  MAIN DRAW LOOP
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    let rafId = 0;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function draw(now) {
+      rafId = requestAnimationFrame(draw);
+
+      const dt = state.isPlaying ? clamp((now - state.lastFrame) / 1000, 0, 0.05) : 0.016;
+      state.lastFrame = now;
+
+      if (state.isPlaying) {
+        state.globalTime += dt;
+        state.elapsed += dt;
+      }
+
+      const ph = state.phase;
+      const elapsed = state.elapsed;
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Background Ã¢â€â‚¬Ã¢â€â‚¬
+      ctx.fillStyle = '#020002';
+      ctx.fillRect(0, 0, W, H);
+
+      // Radial subtle glow at center
+      if (ph >= PHASE.FLY_IN) {
+        const gA = ph >= PHASE.MERGE ? 0.32 : 0.18;
+        const gc = ctx.createRadialGradient(W / 2, H * 0.42, 0, W / 2, H * 0.42, Math.min(W, H) * 0.6);
+        gc.addColorStop(0, ph >= PHASE.MERGE ? `rgba(168,85,247,${gA})` : `rgba(100,160,240,${gA})`);
+        gc.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gc;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // â”€â”€ Stars â”€â”€
+      const starAlpha = ph === PHASE.INTRO ? easeOut(elapsed / PHASE_DUR[PHASE.INTRO]) : ph >= PHASE.FLY_IN ? 1 : 0.4;
+      ctx.fillStyle = '#ffffff';
+      for (const s of stars) {
+        if (state.isPlaying) s.phase += dt * s.speed;
+        const tw = 0.15 + 0.85 * Math.abs(Math.sin(s.phase));
+        ctx.globalAlpha = tw * 0.45 * starAlpha;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Hearts FLY IN & Approach (Phase 2: Starts offscreen, smoothly travels into center) Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph === PHASE.FLY_IN) {
+        const dur = PHASE_DUR[PHASE.FLY_IN];
+        const flyProg = clamp(elapsed / dur, 0, 1);
+        // Authentic smooth ease-out: hearts enter smoothly, decelerate inward
+        const easeProg = 1 - Math.pow(1 - flyProg, 2.5);
+
+        state.lx = lerp(-W * 0.25, W * 0.50, easeProg);
+        state.rx = lerp(W * 1.25, W * 0.50, easeProg);
+        state.nameTextAlpha = clamp(flyProg / 0.22, 0, 1);
+
+        // Spawn blurry trailing heart particles behind moving hearts
+        if (state.isPlaying) {
+          const scale = getHeartScale();
+          // Left Heart Trail
+          for (let k = 0; k < 2; k++) {
+            const offX = (Math.random() - 0.5) * scale * 12;
+            const offY = (Math.random() - 0.5) * scale * 12;
+            flyTrailParticles.push({
+              x: state.lx - scale * 5 + offX,
+              y: state.ly + offY,
+              vx: -2.0 - Math.random() * 2.5,
+              vy: (Math.random() - 0.5) * 1.5,
+              size: 3.2 + Math.random() * 4.2,
+              color: CFG.color1.main,
+              alpha: 0.85,
+              life: 0,
+              maxLife: 26 + Math.floor(Math.random() * 20),
+            });
+          }
+          // Right Heart Trail
+          for (let k = 0; k < 2; k++) {
+            const offX = (Math.random() - 0.5) * scale * 12;
+            const offY = (Math.random() - 0.5) * scale * 12;
+            flyTrailParticles.push({
+              x: state.rx + scale * 5 + offX,
+              y: state.ry + offY,
+              vx: 2.0 + Math.random() * 2.5,
+              vy: (Math.random() - 0.5) * 1.5,
+              size: 3.2 + Math.random() * 4.2,
+              color: CFG.color2.main,
+              alpha: 0.85,
+              life: 0,
+              maxLife: 26 + Math.floor(Math.random() * 20),
+            });
+          }
+        }
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Collision Impact (Phase 3: Impact explosion & shockwaves) Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph === PHASE.COLLIDE) {
+        state.lx = W * 0.50;
+        state.rx = W * 0.50;
+        state.nameTextAlpha = Math.max(0, 1 - elapsed * 4);
+
+        if (!state.hasExploded) {
+          state.hasExploded = true;
+          playMergeExplosion();
+
+          // Particles blast radially outward in 360 degrees
+          for (const p of particles) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.max(W, H) * (0.9 + Math.random() * 1.2);
+            p.vx = Math.cos(angle) * speed;
+            p.vy = Math.sin(angle) * speed;
+            p.alpha = 1.0;
+          }
+          state.shockwaveR = 5;
+          state.shockwaveAlpha = 1.0;
+          state.shockwave2R = 5;
+          state.shockwave2Alpha = 0;
+          state.flashAlpha = 1.0;
+          setTimeout(() => { state.shockwave2Alpha = 0.8; }, 120);
+        }
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Render & Update Flying Particle Trails Ã¢â€â‚¬Ã¢â€â‚¬
+      for (let i = flyTrailParticles.length - 1; i >= 0; i--) {
+        const tp = flyTrailParticles[i];
+        if (state.isPlaying) {
+          tp.x += tp.vx;
+          tp.y += tp.vy;
+          tp.vx *= 0.93;
+          tp.vy *= 0.93;
+          tp.life++;
+          tp.alpha = Math.max(0, 0.85 * (1 - tp.life / tp.maxLife));
+        }
+        if (tp.life >= tp.maxLife || tp.alpha <= 0.01) {
+          flyTrailParticles.splice(i, 1);
+          continue;
+        }
+        drawHeart(ctx, tp.x, tp.y, tp.size, tp.color, tp.alpha);
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Heartbeat timing Ã¢â€â‚¬Ã¢â€â‚¬
+      const beatInterval = state.beatInterval;
+      if (state.isPlaying && (ph === PHASE.FLY_IN || ph === PHASE.COLLIDE)) {
+        if (state.globalTime - state.lastLBeat >= beatInterval) {
+          state.lastLBeat = state.globalTime;
+          state.lBeat = state.globalTime;
+          playHeartbeat('L', 0.85);
+        }
+        if (state.globalTime - state.lastRBeat >= beatInterval * 1.05) {
+          state.lastRBeat = state.globalTime;
+          state.rBeat = state.globalTime;
+          playHeartbeat('R', 0.85);
+        }
+      }
+      if (state.isPlaying && ph >= PHASE.MERGE) {
+        if (state.globalTime - state.lastCBeat >= beatInterval * 0.92) {
+          state.lastCBeat = state.globalTime;
+          state.cBeat = state.globalTime;
+          playHeartbeat('C', 1.25);
+        }
+      }
+
+      // Pulse curve (Lub-Dub dual pulse)
+      function getPulse(lastBeat, amp = 0.09) {
+        const t = state.globalTime - lastBeat;
+        if (t < 0.0 || t > 0.85) return 1.0;
+        if (t < 0.28) {
+          const p1 = t / 0.28;
+          return 1.0 + amp * Math.sin(p1 * Math.PI) * Math.exp(-p1 * 1.1);
+        }
+        if (t < 0.65) {
+          const p2 = (t - 0.28) / 0.37;
+          return 1.0 + (amp * 0.42) * Math.sin(p2 * Math.PI) * Math.exp(-p2 * 1.4);
+        }
+        return 1.0;
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Update & Draw Particles Ã¢â€â‚¬Ã¢â€â‚¬
+      const lPulse = (ph < PHASE.MERGE) ? getPulse(state.lBeat, 0.15) : 1;
+      const rPulse = (ph < PHASE.MERGE) ? getPulse(state.rBeat, 0.15) : 1;
+      const cPulse = (ph >= PHASE.MERGE) ? getPulse(state.cBeat, 0.12) : 1;
+
+      for (const p of particles) {
+        if (state.isPlaying) {
+          if (state.hasExploded && ph < PHASE.MERGE) {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.99;
+            p.vy *= 0.99;
+            p.alpha = Math.max(0, p.alpha - dt * 0.12);
+          } else if (p.side === 'C') {
+            const pulse = getPulse(state.cBeat, 0.12);
+            const tx = state.cx + (p.mRelX || 0) * pulse;
+            const ty = state.cy + (p.mRelY || 0) * pulse;
+
+            if (ph > PHASE.MERGE) {
+              p.x = tx;
+              p.y = ty;
+              p.alpha = 0.95;
+            } else {
+              const mergeTime = Math.max(0, elapsed - (p.delay || 0));
+              const duration = 4.2;
+              const rawProg = clamp(mergeTime / duration, 0, 1);
+
+              if (rawProg < 1.0) {
+                const easeProg = 1 - Math.pow(1 - rawProg, 3.2);
+                let curX = lerp(p.startX || W / 2, tx, easeProg);
+                let curY = lerp(p.startY || -60, ty, easeProg);
+                const angle = Math.atan2(ty - (p.startY || -60), tx - (p.startX || W / 2));
+                const arc = Math.sin(easeProg * Math.PI) * (p.curveDir || 20) * (1 - easeProg);
+                curX += -Math.sin(angle) * arc;
+                curY += Math.cos(angle) * arc;
+                p.x = curX;
+                p.y = curY;
+                p.alpha = Math.min(0.95, easeProg * 1.5);
+              } else {
+                p.x = tx;
+                p.y = ty;
+                p.alpha = 0.95;
+              }
+            }
+          } else {
+            let tx = p.tx, ty = p.ty;
+            if (p.side === 'L') { tx = state.lx + p.relX * lPulse; ty = state.ly + p.relY * lPulse; }
+            if (p.side === 'R') { tx = state.rx + p.relX * rPulse; ty = state.ry + p.relY * rPulse; }
+
+            p.x += (tx - p.x) * 0.28 + p.vx;
+            p.y += (ty - p.y) * 0.28 + p.vy;
+            p.vx *= 0.85; p.vy *= 0.85;
+            p.alpha += (p.targetAlpha - p.alpha) * 0.1;
+          }
+        }
+
+        if (ph < PHASE.FLY_IN || p.alpha < 0.02) continue;
+        drawHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ SCREEN FLASH on Collision Ã¢â€â‚¬Ã¢â€â‚¬
+      if (state.flashAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = state.flashAlpha;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+        if (state.isPlaying) state.flashAlpha *= 0.82;
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Shockwave Rings on Collision Ã¢â€â‚¬Ã¢â€â‚¬
+      if (state.shockwaveAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = state.shockwaveAlpha;
+        ctx.strokeStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(255,255,255,0.9)';
+        ctx.shadowBlur = 45;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(W * 0.50, H * 0.45, state.shockwaveR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+        if (state.isPlaying) {
+          state.shockwaveR += dt * 600;
+          state.shockwaveAlpha *= 0.88;
+        }
+      }
+      if (state.shockwave2Alpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = state.shockwave2Alpha;
+        ctx.strokeStyle = CFG.merged.main;
+        ctx.shadowColor = CFG.merged.glow;
+        ctx.shadowBlur = 35;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(W * 0.50, H * 0.45, state.shockwave2R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+        if (state.isPlaying) {
+          state.shockwave2R += dt * 480;
+          state.shockwave2Alpha *= 0.88;
+        }
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Glow rings under hearts Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph >= PHASE.FLY_IN && ph < PHASE.MERGE && state.nameTextAlpha > 0.1) {
+        [[state.lx, state.ly, CFG.color1.glow, state.lBeat],
+        [state.rx, state.ry, CFG.color2.glow, state.rBeat]].forEach(([hx, hy, gc, lb]) => {
+          const pulse = getPulse(lb, 0.15);
+          const r = getHeartScale() * 10 * pulse;
+          const rg = ctx.createRadialGradient(hx, hy - r * 0.2, r * 0.1, hx, hy, r * 1.8);
+          rg.addColorStop(0, gc.replace('0.85', '0.28'));
+          rg.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.save();
+          ctx.globalAlpha = state.nameTextAlpha;
+          ctx.fillStyle = rg;
+          ctx.beginPath(); ctx.arc(hx, hy, r * 1.8, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        });
+      }
+      if (ph >= PHASE.MERGE) {
+        const pulse = getPulse(state.cBeat, 0.12);
+        const r = getHeartScale() * 14 * pulse;
+        const rg = ctx.createRadialGradient(state.cx, state.cy - r * 0.2, r * 0.1, state.cx, state.cy, r * 2.2);
+        rg.addColorStop(0, 'rgba(192,132,252,0.30)');
+        rg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.save();
+        ctx.fillStyle = rg;
+        ctx.beginPath(); ctx.arc(state.cx, state.cy, r * 2.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Name Text Under Hearts Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph >= PHASE.FLY_IN && ph < PHASE.MERGE && state.nameTextAlpha > 0.01) {
+        const fontFamily = "'Cormorant Garamond', Georgia, serif";
+        const fontSize = Math.max(20, Math.min(W * 0.032, 36));
+
+        ctx.save();
+        ctx.shadowBlur = 20; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.globalAlpha = state.nameTextAlpha;
+
+        // Name1 under left heart
+        ctx.shadowColor = CFG.color1.glow;
+        ctx.fillStyle = CFG.color1.main;
+        ctx.font = `italic 600 ${fontSize}px ${fontFamily}`;
+        ctx.fillText(CFG.name1, state.lx, state.ly + getHeartScale() * 19.5);
+
+        // Name2 under right heart
+        ctx.shadowColor = CFG.color2.glow;
+        ctx.fillStyle = CFG.color2.main;
+        ctx.fillText(CFG.name2, state.rx, state.ry + getHeartScale() * 19.5);
+        ctx.restore();
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ ECG Line Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph === PHASE.ECG || ph >= PHASE.MSG_REVEAL) {
+        const ecgY = H * 0.82;
+        const ecgW = W * 0.8;
+        const ecgX0 = W * 0.1;
+        const spikeH = H * 0.06;
+        const prog = clamp(elapsed / 2.2, 0, 1);
+        const col = CFG.merged.main;
+
+        const visibleCount = ph > PHASE.ECG ? ECG_WAVEFORM.length : Math.floor(prog * ECG_WAVEFORM.length);
+        if (visibleCount > 1) {
+          ctx.save();
+          ctx.strokeStyle = col;
+          ctx.shadowColor = CFG.merged.glow;
+          ctx.shadowBlur = 14;
+          ctx.lineWidth = 2.2;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(ecgX0 + ECG_WAVEFORM[0].t * ecgW, ecgY + ECG_WAVEFORM[0].y * spikeH);
+          for (let i = 1; i < visibleCount; i++) {
+            ctx.lineTo(ecgX0 + ECG_WAVEFORM[i].t * ecgW, ecgY + ECG_WAVEFORM[i].y * spikeH);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        if (ph > PHASE.ECG) {
+          const beatT = (state.globalTime * 0.7) % 1;
+          let byVal = 0;
+          if (beatT < 0.43) byVal = 0;
+          else if (beatT < 0.50) byVal = Math.sin((beatT - 0.43) / 0.07 * Math.PI) * 0.18;
+          else if (beatT < 0.55) byVal = -Math.pow(Math.sin((beatT - 0.50) / 0.05 * Math.PI), 2);
+          else if (beatT < 0.60) byVal = 0.65 * Math.sin((beatT - 0.55) / 0.05 * Math.PI);
+          else byVal = 0;
+
+          const bx2 = ecgX0 + beatT * ecgW;
+          const by2 = ecgY + byVal * spikeH;
+          drawHeart(ctx, bx2, by2, 4.5, CFG.merged.main, 0.95);
+        }
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Message & Names Text Reveal Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph >= PHASE.MSG_REVEAL) {
+        if (state.isPlaying) state.msgAlpha = clamp(state.msgAlpha + dt * 0.45, 0, 1);
+        const pulse = getPulse(state.cBeat, 0.04);
+        ctx.save();
+
+        const ffSerif = "'Cormorant Garamond', 'Cinzel', Georgia, serif";
+        const ffCursive = "'Great Vibes', cursive";
+
+        const scale = getHeartScale() * 1.25;
+        const maxPulse = 1.15;
+        const heartTopBound = state.cy - (16.5 * scale * maxPulse);
+        const safeTop = Math.max(34, H * 0.05);
+        const availableHeadroom = Math.max(90, heartTopBound - safeTop);
+
+        const mainSz = clamp(Math.min(availableHeadroom * 0.22, W * 0.040), 18, 36) * pulse;
+        const subSz = clamp(Math.min(availableHeadroom * 0.11, W * 0.020), 12, 17) * pulse;
+        let nameSz = clamp(Math.min(availableHeadroom * 0.24, W * 0.045), 20, 40) * pulse;
+
+        const titleY = safeTop + availableHeadroom * 0.20;
+        const subY = safeTop + availableHeadroom * 0.50;
+        const namesY = safeTop + availableHeadroom * 0.80;
+
+        // 1. Title ("Two Hearts, One Beat")
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = state.msgAlpha;
+        ctx.shadowColor = CFG.merged.glow;
+        ctx.shadowBlur = 28;
+        ctx.fillStyle = '#fff8e7';
+        ctx.font = `italic 600 ${mainSz}px ${ffSerif}`;
+        ctx.fillText(CFG.msg, W / 2, titleY);
+
+        // 2. Subtitle ("Forever Yours" + glowing lavender heart)
+        if (state.msgAlpha > 0.2) {
+          const subAlpha = Math.max(0, (state.msgAlpha - 0.2) / 0.8);
+          ctx.globalAlpha = subAlpha;
+          ctx.font = `italic 400 ${subSz}px ${ffSerif}`;
+          const subText = CFG.sub || 'Forever Yours';
+          const subW = ctx.measureText(subText).width;
+          const subHeartGap = subSz * 1.4;
+          const subStartX = (W - (subW + subHeartGap)) / 2;
+
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#e9d5ff';
+          ctx.shadowColor = CFG.merged.glow;
+          ctx.shadowBlur = 18;
+          ctx.fillText(subText, subStartX, subY);
+          drawHeart(ctx, subStartX + subW + subHeartGap * 0.55, subY - 1, subSz * 0.35, '#c084fc', subAlpha);
+        }
+
+        // 3. Names ("Umar" + glowing ruby heart + "Tanvi")
+        if (state.msgAlpha > 0.4) {
+          const namesAlpha = Math.max(0, (state.msgAlpha - 0.4) / 0.6);
+          ctx.globalAlpha = namesAlpha;
+          ctx.font = `${nameSz}px ${ffCursive}`;
+
+          let w1 = ctx.measureText(CFG.name1).width;
+          let w2 = ctx.measureText(CFG.name2).width;
+          let heartGap = Math.max(26, nameSz * 0.95);
+          let totalW = w1 + heartGap + w2;
+
+          if (totalW > W * 0.90) {
+            const fitScale = (W * 0.90) / totalW;
+            nameSz = Math.max(16, nameSz * fitScale);
+            ctx.font = `${nameSz}px ${ffCursive}`;
+            w1 = ctx.measureText(CFG.name1).width;
+            w2 = ctx.measureText(CFG.name2).width;
+            heartGap = Math.max(20, nameSz * 0.95);
+            totalW = w1 + heartGap + w2;
+          }
+
+          const startX = (W - totalW) / 2;
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#f3e8ff';
+          ctx.shadowColor = 'rgba(192, 132, 252, 0.9)';
+          ctx.shadowBlur = 24;
+
+          ctx.fillText(CFG.name1, startX, namesY);
+          const heartCenterX = startX + w1 + heartGap / 2;
+          drawHeart(ctx, heartCenterX, namesY - nameSz * 0.06, nameSz * 0.40, '#ff4d6d', namesAlpha);
+          ctx.fillText(CFG.name2, startX + w1 + heartGap, namesY);
+        }
+
+        ctx.restore();
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Falling Hearts Rain Ã¢â€â‚¬Ã¢â€â‚¬
+      if (ph >= PHASE.MERGE) {
+        if (state.isPlaying && Math.random() < 0.28) {
+          const colors = [CFG.color1.main, CFG.color2.main, CFG.merged.main, '#c084fc', '#d8b4fe', '#93c5fd', '#e2e8f0'];
+          fallingHearts.push({
+            x: Math.random() * W,
+            y: -30,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: 0.6 + Math.random() * 0.9,
+            size: 3.5 + Math.random() * 6.5,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 0.8 + Math.random() * 0.2,
+            spin: Math.random() * Math.PI * 2,
+          });
+        }
+        for (let i = fallingHearts.length - 1; i >= 0; i--) {
+          const fh = fallingHearts[i];
+          if (state.isPlaying) {
+            fh.x += fh.vx + Math.sin(state.globalTime * 0.7 + i) * 0.35;
+            fh.y += fh.vy;
+            fh.spin += 0.01;
+            if (fh.y > H * 0.82) fh.alpha = Math.max(0, fh.alpha - 0.015);
+          }
+          if (fh.y > H + 40 || fh.alpha <= 0) {
+            fallingHearts.splice(i, 1);
+            continue;
+          }
+          drawHeart(ctx, fh.x, fh.y, fh.size, fh.color, fh.alpha);
+        }
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Click burst hearts Ã¢â€â‚¬Ã¢â€â‚¬
+      for (let i = state.clickHearts.length - 1; i >= 0; i--) {
+        const h = state.clickHearts[i];
+        if (state.isPlaying) {
+          h.x += h.vx; h.y += h.vy; h.vy += 0.1; h.vx *= 0.97;
+          h.life++; h.alpha = Math.max(0, 1 - (h.life / h.maxLife));
+          h.size *= 0.98;
+        }
+        if (h.life >= h.maxLife || h.size < 0.3) {
+          state.clickHearts.splice(i, 1);
+          continue;
+        }
+        drawHeart(ctx, h.x, h.y, h.size, h.color, h.alpha);
+      }
+
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Phase advance Ã¢â€â‚¬Ã¢â€â‚¬
+      if (state.isPlaying && state.phase !== PHASE.IDLE && state.phase !== PHASE.FINALE) {
+        if (state.phase === PHASE.FLY_IN) {
+          // In standalone mode, naturally advance when duration completes
+          if (!isEmbedded && elapsed >= PHASE_DUR[PHASE.FLY_IN]) {
+            enterPhase(PHASE.COLLIDE);
+          } else if (isEmbedded && (pendingCollisionTrigger || state.collisionTriggered)) {
+            pendingCollisionTrigger = false;
+            enterPhase(PHASE.COLLIDE);
+          }
+        } else {
+          const dur = PHASE_DUR[state.phase];
+          if (dur !== undefined && dur > 0 && elapsed >= dur) {
+            enterPhase(state.phase + 1);
+          }
+        }
+      }
+    }
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  CLICK & TOUCH INTERACTION
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    function spawnClickHearts(x, y) {
+      const colors = [CFG.color1.main, CFG.color2.main, CFG.merged.main, '#c084fc', '#d8b4fe', '#93c5fd', '#ffffff'];
+      for (let i = 0; i < 14; i++) {
+        const angle = Math.PI * 1.3 + Math.random() * Math.PI * 0.4;
+        const speed = 1.5 + Math.random() * 4;
+        state.clickHearts.push({
+          x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          size: 4 + Math.random() * 5, alpha: 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 0, maxLife: 55 + Math.floor(Math.random() * 35),
+        });
+      }
+    }
+
+    canvas.addEventListener('click', e => {
+      const r = canvas.getBoundingClientRect();
+      spawnClickHearts(e.clientX - r.left, e.clientY - r.top);
+    });
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const r = canvas.getBoundingClientRect();
+      if (e.touches[0]) {
+        spawnClickHearts(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+      }
+    }, { passive: false });
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  RESET / RESTART
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    function resetScene() {
+      stopBGM();
+      if (finaleTimer) {
+        clearTimeout(finaleTimer);
+        finaleTimer = null;
+      }
+      state.isPlaying = false;
+      state.phase = PHASE.IDLE;
+      state.elapsed = 0;
+      state.globalTime = 0;
+      state.collisionTriggered = false;
+      pendingCollisionTrigger = false;
+      state.lBeat = 0; state.rBeat = 0; state.cBeat = 0;
+      state.lastLBeat = 0; state.lastRBeat = 0; state.lastCBeat = 0;
+      state.hasExploded = false;
+      state.shockwaveR = 0; state.shockwaveAlpha = 0;
+      state.shockwave2R = 0; state.shockwave2Alpha = 0;
+      state.flashAlpha = 0;
+      state.ecgPoints = []; state.ecgProgress = 0;
+      state.nameTextAlpha = 0; state.msgAlpha = 0; state.finaleAlpha = 0;
+      state.clickHearts = [];
+      fallingHearts = [];
+      flyTrailParticles = [];
+      state.lx = -W * 0.25; state.ly = H * 0.45;
+      state.rx = W * 1.25; state.ry = H * 0.45;
+      state.cx = W * 0.50; state.cy = H * 0.45;
+      initParticles();
+    }
+
+    function startAnimation() {
+      if (state.isPlaying) return;
+      initAudio();
+      state.isPlaying = true;
+      state.lastFrame = performance.now();
+      enterPhase(PHASE.INTRO);
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(draw);
+    }
+
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    //  CONTROLS
+    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    const restartBtn = document.getElementById('btn-restart');
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        initAudio();
+        resetScene();
+        startAnimation();
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (finaleTimer) clearTimeout(finaleTimer);
+    });
+
+    window.addEventListener('pointerdown', () => initAudio(), { once: true });
+    window.addEventListener('click', () => initAudio(), { once: true });
+
+    resetScene();
+
+    if (!isEmbedded) {
+      startAnimation();
+    } else {
+      rafId = requestAnimationFrame(draw);
+    }
+
+    window.triggerCollide = () => {
+      if (state.isPlaying) enterPhase(PHASE.COLLIDE);
+    };
+
+    window.reactActive = true;
+  </script>
+</body>
+
+</html>
