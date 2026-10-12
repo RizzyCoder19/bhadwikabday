@@ -1,0 +1,317 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+body {
+  background: radial-gradient(ellipse at 50% 40%, #17071e 0%, #06010a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  color: #ffffff;
+}
+
+/* ── Ambient Space Vignette ── */
+.space-vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(2, 0, 4, 0.8) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Cake Stage (Rigid Anchor Container) ── */
+.cake-stage {
+  position: relative;
+  width: 200px;
+  height: 500px;
+  margin: -100px auto -30px auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 20;
+}
+
+#cake {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 500px;
+  margin: 0;
+  z-index: 20;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.7));
+}
+
+/* ── Candle & Hitbox ── */
+.candle-hitbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 500px;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.candle {
+  background: linear-gradient(180deg, #ffffff 0%, #f7d794 100%);
+  border-radius: 10px;
+  position: absolute;
+  top: 375px; /* Sits directly in top tier frosting (frosting surface is at y ≈ 410px, 375 + 35 = 410px) */
+  left: 100px; /* SVG cake center is x = 100px */
+  margin-left: -2.5px;
+  margin-top: 0;
+  width: 5px;
+  height: 35px;
+  transform: translateY(-300px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  animation: candleDropIn 600ms 6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Generous invisible touch target for easy clicking */
+.candle::before {
+  content: "";
+  position: absolute;
+  top: -35px;
+  left: -35px;
+  width: 75px;
+  height: 100px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.candle:hover {
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9));
+}
+
+.candle:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2.5px;
+  background: rgba(225, 29, 72, 0.6);
+  top: 25%;
+  left: 0;
+}
+
+/* ── Realistic Romantic Candle Flame ── */
+.fire {
+  border-radius: 100%;
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  margin-left: -3px;
+  width: 7px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.fire:nth-child(1) { animation: fire 2s 6.5s infinite; }
+.fire:nth-child(2) { animation: fire 1.5s 6.5s infinite; }
+.fire:nth-child(3) { animation: fire 1s 6.5s infinite; }
+.fire:nth-child(4) { animation: fire 0.5s 6.5s infinite; }
+.fire:nth-child(5) { animation: fire 0.2s 6.5s infinite; }
+
+@keyframes fire {
+  0%, 100% {
+    background: radial-gradient(circle, #fff7b2 20%, #ff8c00 70%, rgba(255, 69, 0, 0) 100%);
+    box-shadow: 0 0 30px 8px rgba(255, 179, 71, 0.45), 0 0 60px 15px rgba(255, 94, 98, 0.25);
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    background: radial-gradient(circle, #ffffff 10%, #ffa500 60%, rgba(255, 0, 0, 0) 100%);
+    box-shadow: 0 0 35px 12px rgba(255, 179, 71, 0.6), 0 0 70px 20px rgba(255, 94, 98, 0.35);
+    transform: translateY(-8px) scale(0.92);
+  }
+}
+
+@keyframes candleDropIn {
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ── Interactive Royal Prompt ── */
+.royal-cake-prompt {
+  position: relative;
+  z-index: 50;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  background: rgba(25, 8, 28, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 215, 0, 0.1);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: promptReveal 1.2s 6.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.royal-cake-prompt:hover {
+  border-color: rgba(255, 215, 0, 0.7);
+  box-shadow: 0 10px 35px rgba(255, 215, 0, 0.25);
+}
+
+.royal-cake-prompt.is-granted {
+  border-color: rgba(255, 117, 160, 0.6);
+  background: rgba(45, 10, 35, 0.85);
+  box-shadow: 0 8px 35px rgba(255, 117, 160, 0.35);
+}
+
+.prompt-icon {
+  font-size: 16px;
+  animation: sparkleRotate 3s infinite ease-in-out;
+}
+
+.prompt-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(16px, 2.2vw, 21px);
+  letter-spacing: 0.06em;
+  color: #fff2cc;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes promptReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sparkleRotate {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.25) rotate(15deg); }
+}
+
+/* ── Royal Typography ── */
+.text {
+  position: relative;
+  z-index: 50;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.text h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(28px, 4.2vw, 42px);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ffffff 0%, #ffd700 60%, #f39c12 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
+  margin-bottom: 6px;
+}
+
+.text p {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(22px, 3.2vw, 32px);
+  color: #ff9ebb;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 20px rgba(255, 117, 160, 0.4);
+}
+
+/* ── Interactive Balloons with Pop Vibrance ── */
+.balloons {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  overflow: hidden;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -130px;
+  width: 58px;
+  height: 74px;
+  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+  box-shadow: inset -7px -7px 18px rgba(0, 0, 0, 0.25), inset 6px 6px 14px rgba(255, 255, 255, 0.6);
+  animation: floatUp 12s infinite linear;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.balloon:hover {
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 18px rgba(255, 215, 0, 0.7));
+}
+
+.balloon::before {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 24px;
+  width: 10px;
+  height: 10px;
+  background-color: inherit;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.balloon::after {
+  content: "";
+  position: absolute;
+  bottom: -65px;
+  left: 28px;
+  width: 1.5px;
+  height: 65px;
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.balloon1 { background: radial-gradient(circle at 35% 35%, #ffe680, #d4af37); left: 12%; animation-duration: 13s; animation-delay: 0.5s; }
+.balloon2 { background: radial-gradient(circle at 35% 35%, #ffffff, #c0c0c0); left: 32%; animation-duration: 16s; animation-delay: 2.5s; }
+.balloon3 { background: radial-gradient(circle at 35% 35%, #ffb6c1, #e11d48); left: 54%; animation-duration: 14s; animation-delay: 0s; }
+.balloon4 { background: radial-gradient(circle at 35% 35%, #ffd1dc, #ff75a0); left: 74%; animation-duration: 17s; animation-delay: 1.8s; }
+.balloon5 { background: radial-gradient(circle at 35% 35%, #fff3e0, #e6b800); left: 86%; animation-duration: 15s; animation-delay: 4s; }
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-55vh) rotate(3deg); }
+  100% { transform: translateY(-120vh) rotate(-3deg); }
+}
+
+/* ── Canvases ── */
+#magicCursor {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#smokeCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 45;
+}

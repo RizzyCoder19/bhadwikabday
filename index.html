@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Casa Tanvi — A 20th Birthday Film for You</title>
+  <meta name="description" content="A cinematic, heartfelt birthday journey crafted with love for Tanvi.">
+
+  <!-- Elegant Google Fonts for cinematic luxury typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@200;300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="film-body">
+
+  <!-- Master Cinematic Soundtrack (Continuous playback across all scenes) -->
+  <audio id="masterAudio" src="./lut-gaye.mp3" preload="auto" playsinline></audio>
+
+  <!-- Ambient Cinematic Lighting & Letterbox -->
+  <div class="letterbox letterbox--top" aria-hidden="true"></div>
+  <div class="letterbox letterbox--bottom" aria-hidden="true"></div>
+  <div class="vignette-overlay" aria-hidden="true"></div>
+
+  <!-- Main Cinema Stage -->
+  <main id="cinemaStage" class="cinema-stage">
+
+    <!-- Isolated Iframe for Original Preserved Experiences -->
+    <iframe id="experienceFrame" class="experience-frame" src="about:blank" title="Experience Stage" allow="autoplay"
+      tabindex="0">
+    </iframe>
+
+    <!-- Smooth Cinematic Black Curtain for Transitions -->
+    <div id="curtain" class="curtain curtain--active" aria-hidden="true"></div>
+
+    <!-- Cinematic Confession Prelude (Quiet personal note before the film begins) -->
+    <section id="confessionPrelude" class="confession-prelude" aria-label="A Private Confession">
+      <div class="confession-bg-glow" aria-hidden="true"></div>
+      <canvas id="confessionDustCanvas" class="confession-dust-canvas" aria-hidden="true"></canvas>
+
+      <div class="confession-container">
+        <div class="confession-content" id="confessionContent">
+          <p class="confession-line" id="confessionLine"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Opening Pure Cinematic Prologue (Texts Emerge Naturally On Screen) -->
+    <section id="prologue" class="prologue" aria-label="Introduction Screen">
+      <canvas id="prologueCanvas" class="prologue-canvas" aria-hidden="true"></canvas>
+      <div class="prologue-vignette" aria-hidden="true"></div>
+
+      <div class="prologue-center">
+        <p class="prologue-tag" id="prologueTag">FOR TANVI</p>
+        <h1 class="prologue-title" id="prologueTitle">A little piece of my heart,<br>coded just for you.</h1>
+        <p class="prologue-dedication" id="prologueDedication">Celebrating your 20th birthday • With all my love, Umar</p>
+        <p class="prologue-whisper" id="prologueWhisper">[ Touch anywhere to begin ]</p>
+      </div>
+    </section>
+
+    <!-- Natural Cinematic Narrative Subtitles (Direct poetic thoughts on dark screen) -->
+    <div id="narrativeOverlay" class="narrative-overlay" aria-live="polite">
+      <div class="narrative-content">
+        <p id="narrativeLine1" class="narrative-line-1"></p>
+        <p id="narrativeLine2" class="narrative-line-2"></p>
+      </div>
+    </div>
+
+    <!-- Unobtrusive Ambient Top HUD -->
+    <header class="ambient-hud">
+      <div class="hud-scene-counter">
+        <span id="sceneNumber">01</span>
+        <span class="hud-divider">/</span>
+        <span>07</span>
+      </div>
+
+      <div class="hud-actions">
+        <!-- Sound Mute/Unmute Toggle Button -->
+        <button id="btnAudioToggle" class="ambient-icon-btn" type="button" aria-label="Toggle soundtrack mute">
+          <svg id="iconVolumeOn" class="hud-sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="iconVolumeOff" class="hud-sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Clearly Visible Bottom-Right Continue Controller (User can skip, but auto-advances if left alone) -->
+    <footer id="ambientFooter" class="ambient-footer">
+      <button id="btnContinue" class="natural-continue-btn" type="button" aria-label="Advance to next chapter">
+        <span class="continue-indicator-dot" aria-hidden="true"></span>
+        <span id="continueLabel">Next Chapter</span>
+        <span class="continue-arrow">➔</span>
+      </button>
+    </footer>
+
+    <!-- Final Personal Birthday Letter & Replay Screen -->
+    <section id="finaleLetter" class="finale-letter-screen" style="display:none;">
+      <div class="letter-card" id="letterCard" title="Tap to reveal full letter">
+        <div class="letter-content" id="letterContent">
+          <p class="letter-greeting" id="letterGreeting">Happy birthday, baby. ❤️</p>
+          <p class="letter-para" id="letterPara1">I really wish I could be there with you today. I wanted to give you something that felt a little more personal than just a text, so I spent my time making this little corner of the internet for you.</p>
+          <p class="letter-para" id="letterPara2">I know it isn't the same as being there to hold you in person, but I hope it made you smile. Through every fight, every late-night conversation, and every mile between Mumbai and Howrah, I'm just really grateful for you.</p>
+          <p class="letter-para" id="letterPara3">Happy 20th, Tanvi. Meri bhadwi, meri cuttiya. I love you.</p>
+          <p class="letter-sign" id="letterSign">— Umar</p>
+        </div>
+
+        <div id="letterSkipHint" class="letter-skip-hint">tap anywhere to read all</div>
+
+        <div class="letter-actions" id="letterActions">
+          <button id="btnReplay" class="letter-replay-btn" type="button">
+            <span>Relive from beginning</span>
+            <span class="replay-icon">↺</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Heart — Original Python Experience</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #060208;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+    }
+    #canvas {
+      display: block;
+      width: 800px;
+      height: 800px;
+      max-width: 95vw;
+      max-height: 95vh;
+      aspect-ratio: 1 / 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="800" height="800"></canvas>
+
+  <script>
+    // Exact faithful JavaScript translation of love.py
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const SC = 21;
+    const OY = 20;
+    const DURATION = 9;
+    const TICK = 16;
+    const ANIM = 42;
+    const LIFT = 34;
+    const GAP = 7;
+    const SIZES = [9, 10, 11, 12];
+    const FONT_FAMILY = 'Arial, sans-serif';
+    const BG = '#060208';
+
+    // Seeded random matching Python random.Random(11)
+    class SeededRng {
+      constructor(seed) {
+        this.s = seed % 2147483647;
+        if (this.s <= 0) this.s += 2147483646;
+      }
+      next() {
+        this.s = (this.s * 16807) % 2147483647;
+        return (this.s - 1) / 2147483646;
+      }
+      uniform(a, b) {
+        return a + (b - a) * this.next();
+      }
+      choice(arr) {
+        return arr[Math.floor(this.next() * arr.length)];
+      }
+      shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(this.next() * (i + 1));
+          const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+      }
+    }
+
+    const rng = new SeededRng(11);
+
+    const PHRASES = [
+      "I love you", "Seni seviyorum", "Te amo", "Je t'aime",
+      "Ich liebe dich", "Ti amo", "Eu te amo", "Я тебя люблю",
+      "사랑해", "愛してる", "我爱你", "मैं तुमसे प्यार करता हूँ",
+      "Σ' αγαπώ", "Ik hou van jou", "Jag älskar dig", "Kocham cię",
+      "ฉันรักเธอ", "Anh yêu em", "Aku cinta kamu", "Я тебе кохаю"
+    ];
+
+    function heart(a) {
+      const x = 16 * Math.pow(Math.sin(a), 3);
+      const y = 13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a);
+      return [x * SC, y * SC + OY];
+    }
+
+    function mix(a, b, k) {
+      return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+    }
+
+    function dim(c, k) {
+      return [c[0] * k, c[1] * k, c[2] * k];
+    }
+
+    function rgbStr(c) {
+      return 'rgb(' + Math.floor(Math.max(0, Math.min(1, c[0])) * 255) + ',' +
+                      Math.floor(Math.max(0, Math.min(1, c[1])) * 255) + ',' +
+                      Math.floor(Math.max(0, Math.min(1, c[2])) * 255) + ')';
+    }
+
+    const POLY = [];
+    for (let i = 0; i < 720; i++) {
+      POLY.push(heart(2 * Math.PI * i / 720));
+    }
+    const EDGES = [];
+    for (let i = 0; i < 720; i++) {
+      EDGES.push([POLY[i], POLY[(i + 1) % 720]]);
+    }
+    const YMAX = Math.max(...POLY.map(p => p[1]));
+    const YMIN = Math.min(...POLY.map(p => p[1]));
+    const CY = (YMAX + YMIN) / 2;
+
+    function spans(y) {
+      const xs = [];
+      for (const [[x1, y1], [x2, y2]] of EDGES) {
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) {
+          xs.push(x1 + (y - y1) * (x2 - x1) / (y2 - y1));
+        }
+      }
+      xs.sort((a, b) => a - b);
+      const res = [];
+      for (let i = 0; i < xs.length; i += 2) {
+        if (i + 1 < xs.length) res.push([xs[i], xs[i + 1]]);
+      }
+      return res;
+    }
+
+    function intersect(A, B) {
+      const out = [];
+      for (const a of A) {
+        for (const b of B) {
+          const lo = Math.max(a[0], b[0]);
+          const hi = Math.min(a[1], b[1]);
+          if (hi - lo > 14) out.push([lo, hi]);
+        }
+      }
+      return out;
+    }
+
+    class PhraseCycle {
+      constructor() {
+        this.order = [...PHRASES];
+        rng.shuffle(this.order);
+        this.idx = 0;
+      }
+      next() {
+        if (this.idx >= this.order.length) {
+          this.order = [...PHRASES];
+          rng.shuffle(this.order);
+          this.idx = 0;
+        }
+        return this.order[this.idx++];
+      }
+    }
+
+    function math_dist(x, y) {
+      return Math.hypot(x / (16 * SC), (y - CY) / (14.5 * SC));
+    }
+
+    function measure(text, size) {
+      ctx.font = 'bold ' + size + 'px ' + FONT_FAMILY;
+      return ctx.measureText(text).width || (text.length * size * 0.6);
+    }
+
+    function build() {
+      const cycle = new PhraseCycle();
+      const row_h = 16;
+      const half = row_h / 2;
+      const placed = [];
+
+      let y = YMAX - half;
+      while (y > YMIN + half) {
+        const row = intersect(spans(y + half), spans(y - half));
+        for (let [lo, hi] of row) {
+          lo += 4; hi -= 4;
+          let cur = lo + rng.uniform(0, 8);
+          const line = [];
+
+          while (true) {
+            let fit = null;
+            for (let tr = 0; tr < 10; tr++) {
+              const text = cycle.next();
+              const size = rng.choice(SIZES);
+              const w = measure(text, size);
+              if (cur + w <= hi) {
+                fit = { text, size, w };
+                break;
+              }
+            }
+            if (!fit) break;
+            line.push({ x: cur + fit.w / 2, text: fit.text, size: fit.size, w: fit.w });
+            cur += fit.w + GAP;
+          }
+
+          if (line.length === 0) continue;
+
+          if (line.length > 1) {
+            const left = hi - (line[line.length - 1].x + line[line.length - 1].w / 2);
+            for (let i = 0; i < line.length; i++) {
+              line[i].x += left * i / (line.length - 1);
+            }
+          } else {
+            line[0].x = (lo + hi) / 2;
+          }
+
+          for (let i = 0; i < line.length; i++) {
+            const edge = (i === 0 || i === line.length - 1);
+            placed.push({
+              x: line[i].x,
+              y: y,
+              text: line[i].text,
+              size: line[i].size,
+              edge: edge
+            });
+          }
+        }
+        y -= row_h;
+      }
+
+      const wine = [0.58, 0.0, 0.09];
+      const crimson = [0.90, 0.05, 0.14];
+      const blood = [0.98, 0.10, 0.16];
+
+      for (const p of placed) {
+        const rad = Math.min(1.0, math_dist(p.x, p.y));
+        let base = mix(wine, crimson, 0.25 + 0.75 * rad);
+        base = mix(base, blood, rng.uniform(0, 0.35) + (p.edge ? 0.3 : 0));
+        p.color = [Math.min(1, base[0]), Math.min(1, base[1]), Math.min(1, base[2])];
+        p.rad = rad;
+      }
+
+      const edges = placed.filter(p => p.edge);
+      const inner = placed.filter(p => !p.edge);
+
+      edges.sort((a, b) => {
+        const a1 = (Math.atan2(a.x, a.y - CY) + 2 * Math.PI) % (2 * Math.PI);
+        const a2 = (Math.atan2(b.x, b.y - CY) + 2 * Math.PI) % (2 * Math.PI);
+        return a1 - a2;
+      });
+
+      inner.sort((a, b) => (-a.rad + rng.uniform(0, 0.08)) - (-b.rad + rng.uniform(0, 0.08)));
+
+      return [...edges, ...inner];
+    }
+
+    const FLASH = [1.0, 0.78, 0.78];
+    const BGC = [6 / 255, 2 / 255, 8 / 255];
+    const ORDER = build();
+    const RATE = ORDER.length / (DURATION * 1000 / TICK);
+
+    const active = [];
+    const settled = [];
+    let itemIdx = 0;
+    let acc = 0.0;
+    let spawning = true;
+
+    function spawn(p) {
+      p.f = 0;
+      p.dx = rng.uniform(-10, 10);
+      p.shimmer = 0;
+      active.push(p);
+    }
+
+    function animatePhrase(p) {
+      p.f += 1;
+      const u = Math.max(0, Math.min(1, p.f / ANIM));
+      const e = 1 - Math.pow(1 - u, 3);
+      const hover = (1 - e) * LIFT;
+      p.curX = p.x + p.dx * (1 - e);
+      p.curY = -p.y - hover;
+
+      const flash = 0.75 * Math.sin(Math.PI * Math.max(0, Math.min(1, (u - 0.55) / 0.45)));
+      const baseCol = mix(BGC, p.color, Math.pow(e, 1.5));
+      p.curColor = mix(baseCol, FLASH, flash);
+
+      if (u >= 1) {
+        p.curX = p.x;
+        p.curY = -p.y;
+        p.curColor = p.color;
+        settled.push(p);
+        return false;
+      }
+      return true;
+    }
+
+    function shimmerLoop() {
+      if (settled.length > 0) {
+        const p = rng.choice(settled);
+        p.shimmer = 1.0;
+      }
+      setTimeout(shimmerLoop, 140);
+    }
+
+    let shimmeringStarted = false;
+    let signalSent = false;
+
+    function tick() {
+      if (spawning) {
+        acc += RATE;
+        while (acc >= 1 && itemIdx < ORDER.length) {
+          acc -= 1;
+          spawn(ORDER[itemIdx++]);
+        }
+        if (itemIdx >= ORDER.length) spawning = false;
+      }
+
+      for (let i = active.length - 1; i >= 0; i--) {
+        if (!animatePhrase(active[i])) active.splice(i, 1);
+      }
+
+      for (const p of settled) {
+        if (p.shimmer > 0) p.shimmer = Math.max(0, p.shimmer - 0.05);
+      }
+
+      // Render
+      ctx.fillStyle = BG;
+      ctx.fillRect(0, 0, 800, 800);
+
+      ctx.save();
+      ctx.translate(400, 400); // Center
+
+      // Settled
+      for (const p of settled) {
+        ctx.font = 'bold ' + p.size + 'px ' + FONT_FAMILY;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.85)';
+        ctx.fillText(p.text, p.x + 1.5, -p.y + 1.5);
+
+        // Color
+        let c = p.color;
+        if (p.shimmer > 0) c = mix(p.color, FLASH, p.shimmer * 0.75);
+        ctx.fillStyle = rgbStr(c);
+        ctx.fillText(p.text, p.x, -p.y);
+      }
+
+      // Active
+      for (const p of active) {
+        ctx.font = 'bold ' + p.size + 'px ' + FONT_FAMILY;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillText(p.text, p.curX + 1.5, p.curY + 1.5);
+
+        ctx.fillStyle = rgbStr(p.curColor);
+        ctx.fillText(p.text, p.curX, p.curY);
+      }
+
+      ctx.restore();
+
+      if (!spawning && active.length === 0) {
+        if (!shimmeringStarted) {
+          shimmeringStarted = true;
+          shimmerLoop();
+        }
+        if (!signalSent) {
+          signalSent = true;
+          setTimeout(() => {
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'CASA_SCENE_FINISHED', scene: 'love-heart' }, '*');
+            }
+          }, 6000);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
